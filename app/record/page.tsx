@@ -175,18 +175,22 @@ export default function Record() {
             const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
             // 오디오 데이터를 16비트 PCM으로 변환
-            const samples = audioBuffer.getChannelData(0);
+            // getChannelData가 반환하는 Float32Array를 새로운 배열로 복사하여 타입 호환성 확보
+            const channelData = audioBuffer.getChannelData(0);
+            const samples = new Float32Array(channelData);
             const originalSampleRate = audioBuffer.sampleRate;
             const targetSampleRate = 44100;
 
             // 리샘플링 (필요한 경우)
-            let resampledSamples = samples;
+            let resampledSamples: Float32Array = samples;
             if (originalSampleRate !== targetSampleRate) {
-              resampledSamples = resample(
+              const resampled = resample(
                 samples,
                 originalSampleRate,
                 targetSampleRate
               );
+              // 타입 호환성을 위해 새로운 Float32Array로 복사
+              resampledSamples = new Float32Array(resampled);
             }
 
             // 16비트 PCM으로 변환
@@ -232,24 +236,35 @@ export default function Record() {
 
   // 리샘플링 함수
   const resample = (
-    samples: Float32Array,
+    samples: Float32Array | ArrayLike<number>,
     fromRate: number,
     toRate: number
   ): Float32Array => {
-    if (fromRate === toRate) return samples;
+    // 입력을 배열로 변환 (타입 호환성을 위해)
+    const inputValues: number[] = [];
+    for (let i = 0; i < samples.length; i++) {
+      inputValues.push(samples[i]);
+    }
+
+    if (fromRate === toRate) {
+      // 새로운 ArrayBuffer를 사용하여 Float32Array 생성
+      return new Float32Array(inputValues);
+    }
 
     const ratio = fromRate / toRate;
-    const newLength = Math.round(samples.length / ratio);
+    const newLength = Math.round(inputValues.length / ratio);
+    // 새로운 ArrayBuffer를 사용하여 Float32Array 생성
     const result = new Float32Array(newLength);
 
     for (let i = 0; i < newLength; i++) {
       const index = i * ratio;
       const indexFloor = Math.floor(index);
-      const indexCeil = Math.min(indexFloor + 1, samples.length - 1);
+      const indexCeil = Math.min(indexFloor + 1, inputValues.length - 1);
       const fraction = index - indexFloor;
 
       result[i] =
-        samples[indexFloor] * (1 - fraction) + samples[indexCeil] * fraction;
+        inputValues[indexFloor] * (1 - fraction) +
+        inputValues[indexCeil] * fraction;
     }
 
     return result;
@@ -540,13 +555,17 @@ export default function Record() {
     view.setUint32(40, length * numberOfChannels * 2, true);
 
     // PCM 데이터 작성
+    // 채널 데이터를 미리 가져와서 타입 호환성 확보
+    const channelDataArrays: Float32Array[] = [];
+    for (let channel = 0; channel < numberOfChannels; channel++) {
+      const channelData = buffer.getChannelData(channel);
+      channelDataArrays.push(new Float32Array(channelData));
+    }
+
     let offset = 44;
     for (let i = 0; i < length; i++) {
       for (let channel = 0; channel < numberOfChannels; channel++) {
-        const sample = Math.max(
-          -1,
-          Math.min(1, buffer.getChannelData(channel)[i])
-        );
+        const sample = Math.max(-1, Math.min(1, channelDataArrays[channel][i]));
         view.setInt16(
           offset,
           sample < 0 ? sample * 0x8000 : sample * 0x7fff,
