@@ -263,8 +263,8 @@ export default function Home() {
       </section>
 
       {/* CTA 섹션 */}
-      <section className='py-20 bg-linear-to-r from-blue-600 via-purple-600 to-pink-600'>
-        <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
+      <section className='py-20 bg-linear-to-r from-blue-600 mb-20 rounded-xl via-purple-600 to-pink-600'>
+        <div className='mx-auto px-4 sm:px-6 lg:px-8'>
           <div className='max-w-3xl mx-auto text-center'>
             <h2 className='text-4xl sm:text-5xl font-bold mb-6 text-white'>
               지금 바로 시작하세요
@@ -289,7 +289,7 @@ export default function Home() {
               <Button
                 asChild
                 size='lg'
-                variant='outline'
+                variant='ghost'
                 className='text-lg px-8 py-6 border-2 border-white text-white hover:bg-white/10'
               >
                 <Link href='/blogs'>

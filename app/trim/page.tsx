@@ -467,7 +467,7 @@ export default function Trim() {
   }, [audioUrl]);
 
   return (
-    <div className='flex min-h-screen justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-5'>
+    <div className='flex justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-5'>
       <div className='container'>
         <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 md:p-12'>
           {/* 제목 */}

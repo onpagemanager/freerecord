@@ -43,7 +43,7 @@ export default function Header() {
 
   return (
     <header className='sticky top-0 left-0 right-0 z-50 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800'>
-      <div className='w-full px-4 sm:px-6 lg:px-8'>
+      <div className='w-full px-4 sm:px-6 lg:px-8 relative'>
         <div className='flex items-center h-20'>
           {/* 로고 - 왼쪽 */}
           <Link href='/' className='flex items-center space-x-1 shrink-0'>
@@ -56,8 +56,8 @@ export default function Header() {
             />
           </Link>
 
-          {/* 메뉴 - 중앙 */}
-          <nav className='hidden lg:flex items-center justify-center flex-1 space-x-8'>
+          {/* 메뉴 - 정확히 중앙에 배치 */}
+          <nav className='hidden lg:flex items-center justify-center absolute left-1/2 -translate-x-1/2 space-x-8'>
             {menuItems.map(item => (
               <Link
                 key={item.name}

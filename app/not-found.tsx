@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Home, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { BackButton } from './back-button';
 
 export default function NotFound() {
   return (
@@ -34,16 +35,7 @@ export default function NotFound() {
               홈으로 돌아가기
             </Link>
           </Button>
-          <Button
-            size='lg'
-            variant='outline'
-            className='w-full sm:w-auto'
-            onClick={() => window.history.back()}
-            type='button'
-          >
-            <ArrowLeft className='w-4 h-4 mr-2' />
-            이전 페이지
-          </Button>
+          <BackButton />
         </div>
 
         {/* 빠른 링크 */}
