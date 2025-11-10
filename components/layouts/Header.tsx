@@ -5,8 +5,16 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 const menuItems = [
-  { name: 'record', href: '/record' },
-  { name: 'trim', href: '/trim' },
+  { name: '녹음기', href: '/record' },
+  { name: '음성변조', href: '/voice-changer' },
+  { name: '음량변경', href: '/change-volume' },
+  { name: '속도변경', href: '/change-speed' },
+  { name: '음정변경', href: '/change-pitch' },
+  { name: '이퀄라이저', href: '/equalizer' },
+  { name: '역재생', href: '/reverse' },
+  { name: '오디오 다듬기', href: '/trim' },
+  { name: '오디오 병합', href: '/audio-joiner' },
+  { name: '블로그', href: '/blogs' },
 ];
 
 // Header 컴포넌트 - 모든 페이지 상단에 표시

@@ -28,7 +28,7 @@ export default function RootLayout({
     <html lang='ko'>
       <body className={`${notoSansKr.className} antialiased`}>
         <Header />
-        {children}
+        <main className='container mx-auto py-20'>{children}</main>
         <Footer />
       </body>
     </html>

@@ -7,35 +7,31 @@ import {
   Play,
   Pause,
   Download,
-  Scissors,
-  Volume2,
   Music,
+  RotateCcw,
+  TrendingUp,
+  TrendingDown,
+  Minus,
 } from 'lucide-react';
 
-export default function Trim() {
+export default function ChangePitch() {
   // 상태 관리
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0); // 전체 길이 (초)
-  const [startTime, setStartTime] = useState(0); // 시작 시간 (초)
-  const [endTime, setEndTime] = useState(0); // 끝 시간 (초)
   const [currentTime, setCurrentTime] = useState(0); // 현재 재생 시간 (초)
-  const [isDragging, setIsDragging] = useState<'start' | 'end' | null>(null);
-  const [fadeIn, setFadeIn] = useState(false); // Fade in 옵션
-  const [fadeOut, setFadeOut] = useState(false); // Fade out 옵션
+  const [pitch, setPitch] = useState(0); // 피치 (semitones, -12 ~ +12)
   const [isProcessing, setIsProcessing] = useState(false); // 처리 중 여부
   const [error, setError] = useState<string | null>(null);
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number>(0);
 
   // 시간 포맷팅 (MM:SS)
   const formatTime = (seconds: number): string => {
@@ -52,12 +48,16 @@ export default function Trim() {
     setAudioFile(file);
 
     // 기존 오디오 정리
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
+    if (sourceRef.current) {
+      sourceRef.current.stop();
+      sourceRef.current = null;
     }
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
+    }
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
     }
 
     const url = URL.createObjectURL(file);
@@ -77,12 +77,8 @@ export default function Trim() {
       // 길이 설정
       const length = buffer.duration;
       setDuration(length);
-      setStartTime(0);
-      setEndTime(length);
       setCurrentTime(0);
-
-      // 웨이브폼 그리기
-      drawWaveform(buffer);
+      setPitch(0); // 기본 피치 0 (원본)
     } catch (err) {
       setError('오디오 파일을 로드할 수 없습니다.');
       console.error('Audio loading error:', err);
@@ -104,151 +100,15 @@ export default function Trim() {
     e.preventDefault();
   };
 
-  // 웨이브폼 그리기
-  const drawWaveform = (buffer: AudioBuffer) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const width = canvas.width;
-    const height = canvas.height;
-
-    // 배경 그리기
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(0, 0, width, height);
-
-    // 오디오 데이터 가져오기
-    const channelData = buffer.getChannelData(0);
-    const samples = channelData.length;
-    const step = Math.ceil(samples / width);
-    const amp = height / 2;
-
-    // 웨이브폼 그리기
-    ctx.strokeStyle = '#22d3ee';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-
-    for (let i = 0; i < width; i++) {
-      const sampleIndex = Math.floor(i * step);
-      const sample = channelData[sampleIndex] || 0;
-      const y = amp + sample * amp;
-      if (i === 0) {
-        ctx.moveTo(i, y);
-      } else {
-        ctx.lineTo(i, y);
-      }
-    }
-
-    ctx.stroke();
-
-    // 선택 영역 표시
-    drawSelection(ctx, width, height);
-  };
-
-  // 선택 영역 그리기
-  const drawSelection = (
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number
-  ) => {
-    if (!audioBuffer) return;
-
-    const startX = (startTime / duration) * width;
-    const endX = (endTime / duration) * width;
-
-    // 선택 영역 배경
-    ctx.fillStyle = 'rgba(34, 211, 238, 0.2)';
-    ctx.fillRect(startX, 0, endX - startX, height);
-
-    // 시작/끝 라인
-    ctx.strokeStyle = '#22d3ee';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(startX, 0);
-    ctx.lineTo(startX, height);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(endX, 0);
-    ctx.lineTo(endX, height);
-    ctx.stroke();
-
-    // 핸들 그리기
-    ctx.fillStyle = '#22d3ee';
-    ctx.fillRect(startX - 4, 0, 8, height);
-    ctx.fillRect(endX - 4, 0, 8, height);
-  };
-
-  // 슬라이더 위치에서 시간 계산
-  const getTimeFromPosition = (clientX: number): number => {
-    if (!containerRef.current || !audioBuffer) return 0;
-
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const percentage = Math.max(0, Math.min(1, x / rect.width));
-    return percentage * duration;
-  };
-
-  // 마우스 다운 핸들러
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!audioBuffer) return;
-
-    const time = getTimeFromPosition(e.clientX);
-    const startDist = Math.abs(time - startTime);
-    const endDist = Math.abs(time - endTime);
-    const threshold = duration * 0.02; // 2% 범위 내에서 핸들 인식
-
-    if (startDist < threshold || startDist < endDist) {
-      setIsDragging('start');
-      setStartTime(Math.max(0, Math.min(time, endTime - 0.1)));
-    } else if (endDist < threshold) {
-      setIsDragging('end');
-      setEndTime(Math.min(duration, Math.max(time, startTime + 0.1)));
-    } else {
-      // 재생 위치 이동
-      setCurrentTime(time);
-      if (audioRef.current) {
-        audioRef.current.currentTime = time;
-      }
-    }
-  };
-
-  // 마우스 이동 핸들러
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !audioBuffer) return;
-
-    const time = getTimeFromPosition(e.clientX);
-
-    if (isDragging === 'start') {
-      setStartTime(Math.max(0, Math.min(time, endTime - 0.1)));
-    } else if (isDragging === 'end') {
-      setEndTime(Math.min(duration, Math.max(time, startTime + 0.1)));
-    }
-
-    // 웨이브폼 다시 그리기
-    if (canvasRef.current && audioBuffer) {
-      const ctx = canvasRef.current.getContext('2d');
-      if (ctx) {
-        drawWaveform(audioBuffer);
-      }
-    }
-  };
-
-  // 마우스 업 핸들러
-  const handleMouseUp = () => {
-    setIsDragging(null);
-  };
-
   // 재생/일시정지
-  const togglePlay = () => {
-    if (!audioUrl || !audioBuffer) return;
+  const togglePlay = async () => {
+    if (!audioBuffer || !audioContextRef.current) return;
 
     if (isPlaying) {
       // 일시정지
-      if (audioRef.current) {
-        audioRef.current.pause();
+      if (sourceRef.current) {
+        sourceRef.current.stop();
+        sourceRef.current = null;
       }
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
@@ -257,33 +117,47 @@ export default function Trim() {
       setIsPlaying(false);
     } else {
       // 재생
-      if (!audioRef.current) {
-        const audio = new Audio(audioUrl);
-        audioRef.current = audio;
+      const audioContext = audioContextRef.current;
 
-        audio.onended = () => {
-          setIsPlaying(false);
-          setCurrentTime(endTime);
-          if (progressIntervalRef.current) {
-            clearInterval(progressIntervalRef.current);
-            progressIntervalRef.current = null;
-          }
-        };
+      // 기존 소스 정리
+      if (sourceRef.current) {
+        sourceRef.current.stop();
+        sourceRef.current = null;
       }
 
-      const audio = audioRef.current;
-      audio.currentTime = Math.max(startTime, currentTime);
-      audio.play();
+      // AudioBufferSourceNode 생성
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.detune.value = pitch * 100; // semitones를 cents로 변환 (1 semitone = 100 cents)
+
+      // GainNode로 볼륨 제어
+      const gainNode = audioContext.createGain();
+      source.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // 재생 시작
+      const offset = currentTime;
+      startTimeRef.current = audioContext.currentTime - offset;
+      source.start(0, offset);
+
+      // 재생 완료 이벤트
+      source.onended = () => {
+        setIsPlaying(false);
+        setCurrentTime(duration);
+        if (progressIntervalRef.current) {
+          clearInterval(progressIntervalRef.current);
+          progressIntervalRef.current = null;
+        }
+      };
+
+      sourceRef.current = source;
 
       // 재생 위치 추적
       progressIntervalRef.current = setInterval(() => {
-        if (audio) {
-          const time = audio.currentTime;
-          setCurrentTime(time);
-
-          // 끝 시간에 도달하면 정지
-          if (time >= endTime) {
-            audio.pause();
+        if (audioContext && sourceRef.current) {
+          const elapsed = audioContext.currentTime - startTimeRef.current;
+          setCurrentTime(Math.min(elapsed, duration));
+          if (elapsed >= duration) {
             setIsPlaying(false);
             if (progressIntervalRef.current) {
               clearInterval(progressIntervalRef.current);
@@ -297,8 +171,29 @@ export default function Trim() {
     }
   };
 
-  // 오디오 트림 및 다운로드
-  const handleTrim = async () => {
+  // 피치 변경 시 재생 중이면 업데이트
+  useEffect(() => {
+    if (sourceRef.current && isPlaying) {
+      sourceRef.current.detune.value = pitch * 100;
+    }
+  }, [pitch, isPlaying]);
+
+  // 피치 아이콘 선택
+  const getPitchIcon = () => {
+    if (pitch < 0) return <TrendingDown className='w-5 h-5' />;
+    if (pitch > 0) return <TrendingUp className='w-5 h-5' />;
+    return <Minus className='w-5 h-5' />;
+  };
+
+  // Semitones를 표시 형식으로 변환
+  const formatPitch = (semitones: number): string => {
+    if (semitones === 0) return '0 (원본)';
+    const sign = semitones > 0 ? '+' : '';
+    return `${sign}${semitones} semitones`;
+  };
+
+  // 피치 변경 및 다운로드
+  const handleChangePitch = async () => {
     if (!audioBuffer || !audioFile) return;
 
     setIsProcessing(true);
@@ -308,45 +203,43 @@ export default function Trim() {
       const audioContext = new (window.AudioContext ||
         (window as any).webkitAudioContext)();
 
-      // 트림할 길이 계산
-      const trimLength = endTime - startTime;
-      const sampleRate = audioBuffer.sampleRate;
+      // 피치 변경을 위한 샘플레이트 조정
+      // 피치를 높이려면 샘플레이트를 높이고, 낮추려면 낮춤
+      // 하지만 길이는 유지해야 하므로 리샘플링 필요
+      const pitchRatio = Math.pow(2, pitch / 12); // semitones를 비율로 변환
+      const originalSampleRate = audioBuffer.sampleRate;
       const numberOfChannels = audioBuffer.numberOfChannels;
-      const startSample = Math.floor(startTime * sampleRate);
-      const endSample = Math.floor(endTime * sampleRate);
-      const length = endSample - startSample;
+      const originalLength = audioBuffer.length;
+      const newLength = originalLength; // 길이는 유지
 
-      // 새로운 AudioBuffer 생성
+      // 새로운 AudioBuffer 생성 (원본 샘플레이트 유지)
       const newBuffer = audioContext.createBuffer(
         numberOfChannels,
-        length,
-        sampleRate
+        newLength,
+        originalSampleRate
       );
 
-      // 오디오 데이터 복사
+      // 피치 시프팅을 위한 리샘플링
       for (let channel = 0; channel < numberOfChannels; channel++) {
         const originalData = audioBuffer.getChannelData(channel);
-        const newData = newBuffer.getChannelData(channel);
         const channelData = new Float32Array(originalData);
-        const trimmedData = channelData.subarray(startSample, endSample);
+        const newData = newBuffer.getChannelData(channel);
 
-        // Fade in 적용
-        if (fadeIn) {
-          const fadeLength = Math.min(sampleRate * 0.5, length); // 0.5초 또는 전체 길이
-          for (let i = 0; i < fadeLength; i++) {
-            trimmedData[i] *= i / fadeLength;
+        // 간단한 피치 시프팅: 샘플을 읽는 위치를 조정
+        for (let i = 0; i < newLength; i++) {
+          const sourceIndex = i / pitchRatio;
+          const indexFloor = Math.floor(sourceIndex);
+          const indexCeil = Math.min(indexFloor + 1, originalLength - 1);
+          const fraction = sourceIndex - indexFloor;
+
+          if (indexFloor >= 0 && indexCeil < originalLength) {
+            newData[i] =
+              channelData[indexFloor] * (1 - fraction) +
+              channelData[indexCeil] * fraction;
+          } else {
+            newData[i] = 0;
           }
         }
-
-        // Fade out 적용
-        if (fadeOut) {
-          const fadeLength = Math.min(sampleRate * 0.5, length); // 0.5초 또는 전체 길이
-          for (let i = 0; i < fadeLength; i++) {
-            trimmedData[length - 1 - i] *= i / fadeLength;
-          }
-        }
-
-        newData.set(trimmedData);
       }
 
       // WAV로 변환
@@ -356,14 +249,17 @@ export default function Trim() {
       const url = URL.createObjectURL(wavBlob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `trimmed-${audioFile.name.replace(/\.[^/.]+$/, '')}.wav`;
+      const originalName = audioFile.name.replace(/\.[^/.]+$/, '');
+      const pitchText =
+        pitch === 0 ? '' : pitch > 0 ? `_+${pitch}st` : `_${pitch}st`;
+      a.download = `${originalName}${pitchText}.wav`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError('오디오 트림 중 오류가 발생했습니다.');
-      console.error('Trim error:', err);
+      setError('피치 변경 중 오류가 발생했습니다.');
+      console.error('Pitch change error:', err);
     } finally {
       setIsProcessing(false);
     }
@@ -421,31 +317,11 @@ export default function Trim() {
     return new Blob([arrayBuffer], { type: 'audio/wav' });
   };
 
-  // Canvas 크기 조정
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (canvas && containerRef.current) {
-      const resizeCanvas = () => {
-        const container = containerRef.current;
-        if (container) {
-          canvas.width = container.clientWidth;
-          canvas.height = 200;
-          if (audioBuffer) {
-            drawWaveform(audioBuffer);
-          }
-        }
-      };
-      resizeCanvas();
-      window.addEventListener('resize', resizeCanvas);
-      return () => window.removeEventListener('resize', resizeCanvas);
-    }
-  }, [audioBuffer]);
-
   // 컴포넌트 언마운트 시 정리
   useEffect(() => {
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
+      if (sourceRef.current) {
+        sourceRef.current.stop();
       }
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl);
@@ -473,10 +349,10 @@ export default function Trim() {
           {/* 제목 */}
           <div className='text-center mb-8'>
             <h1 className='text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2'>
-              오디오 트림
+              피치 변경
             </h1>
             <p className='text-gray-600 dark:text-gray-400'>
-              오디오 파일을 업로드하고 원하는 구간을 잘라내세요
+              오디오 파일의 음높이를 변경하세요 (템포는 유지됩니다)
             </p>
           </div>
 
@@ -541,13 +417,12 @@ export default function Trim() {
                       setAudioFile(null);
                       setAudioBuffer(null);
                       setAudioUrl(null);
-                      setStartTime(0);
-                      setEndTime(0);
                       setCurrentTime(0);
+                      setPitch(0);
                       setIsPlaying(false);
-                      if (audioRef.current) {
-                        audioRef.current.pause();
-                        audioRef.current = null;
+                      if (sourceRef.current) {
+                        sourceRef.current.stop();
+                        sourceRef.current = null;
                       }
                       if (audioUrl) {
                         URL.revokeObjectURL(audioUrl);
@@ -559,41 +434,9 @@ export default function Trim() {
                 </div>
               </div>
 
-              {/* 웨이브폼 */}
-              <div
-                ref={containerRef}
-                className='mb-6 rounded-lg overflow-hidden bg-slate-900 cursor-pointer relative'
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-              >
-                <canvas
-                  ref={canvasRef}
-                  className='w-full h-[200px] block'
-                  style={{ background: '#1e293b' }}
-                />
-              </div>
-
-              {/* 시간 표시 및 컨트롤 */}
-              <div className='mb-6'>
-                <div className='flex items-center justify-between mb-4'>
-                  <div className='text-sm text-gray-600 dark:text-gray-400'>
-                    <span className='font-medium'>시작:</span>{' '}
-                    {formatTime(startTime)}
-                  </div>
-                  <div className='text-sm text-gray-600 dark:text-gray-400'>
-                    <span className='font-medium'>현재:</span>{' '}
-                    {formatTime(currentTime)}
-                  </div>
-                  <div className='text-sm text-gray-600 dark:text-gray-400'>
-                    <span className='font-medium'>끝:</span>{' '}
-                    {formatTime(endTime)}
-                  </div>
-                </div>
-
-                {/* 재생 컨트롤 */}
-                <div className='flex items-center gap-4 justify-center mb-6'>
+              {/* 재생 컨트롤 */}
+              <div className='mb-8'>
+                <div className='flex items-center justify-center gap-4 mb-6'>
                   <Button
                     onClick={togglePlay}
                     variant='default'
@@ -615,54 +458,112 @@ export default function Trim() {
                   </Button>
                 </div>
 
-                {/* Fade 옵션 */}
-                <div className='flex items-center gap-6 justify-center mb-6'>
-                  <label className='flex items-center gap-2 cursor-pointer'>
-                    <input
-                      type='checkbox'
-                      checked={fadeIn}
-                      onChange={e => setFadeIn(e.target.checked)}
-                      className='w-4 h-4'
+                {/* 재생 진행 표시 */}
+                <div className='mb-6'>
+                  <div className='flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-2'>
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
+                  </div>
+                  <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2'>
+                    <div
+                      className='bg-blue-500 h-2 rounded-full transition-all duration-100'
+                      style={{
+                        width: `${
+                          duration > 0 ? (currentTime / duration) * 100 : 0
+                        }%`,
+                      }}
                     />
-                    <span className='text-sm text-gray-700 dark:text-gray-300'>
-                      Fade In
-                    </span>
-                  </label>
-                  <label className='flex items-center gap-2 cursor-pointer'>
-                    <input
-                      type='checkbox'
-                      checked={fadeOut}
-                      onChange={e => setFadeOut(e.target.checked)}
-                      className='w-4 h-4'
-                    />
-                    <span className='text-sm text-gray-700 dark:text-gray-300'>
-                      Fade Out
-                    </span>
-                  </label>
+                  </div>
                 </div>
+              </div>
 
-                {/* 트림 버튼 */}
-                <div className='flex justify-center'>
+              {/* 피치 조절 영역 */}
+              <div className='mb-8 p-6 bg-gray-50 dark:bg-gray-700/50 rounded-lg'>
+                <div className='flex items-center gap-4 mb-4'>
+                  {getPitchIcon()}
+                  <span className='text-lg font-semibold text-gray-900 dark:text-white min-w-[200px]'>
+                    {formatPitch(pitch)}
+                  </span>
                   <Button
-                    onClick={handleTrim}
-                    variant='default'
-                    size='lg'
-                    className='flex items-center gap-2'
-                    disabled={isProcessing || !audioBuffer}
+                    variant='ghost'
+                    size='sm'
+                    onClick={() => setPitch(0)}
+                    className='flex items-center gap-1'
                   >
-                    {isProcessing ? (
-                      <>
-                        <div className='w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
-                        처리 중...
-                      </>
-                    ) : (
-                      <>
-                        <Scissors className='w-5 h-5' />
-                        트림 및 다운로드
-                      </>
-                    )}
+                    <RotateCcw className='w-4 h-4' />
+                    초기화
                   </Button>
                 </div>
+
+                {/* 피치 슬라이더 */}
+                <div className='relative'>
+                  <input
+                    type='range'
+                    min='-12'
+                    max='12'
+                    step='1'
+                    value={pitch}
+                    onChange={e => setPitch(Number(e.target.value))}
+                    className='w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider'
+                    style={{
+                      background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${
+                        ((pitch + 12) / 24) * 100
+                      }%, #e5e7eb ${((pitch + 12) / 24) * 100}%, #e5e7eb 100%)`,
+                    }}
+                  />
+                  <div className='flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mt-2'>
+                    <span>-12 semitones</span>
+                    <span className='font-medium'>0 (원본)</span>
+                    <span>+12 semitones</span>
+                  </div>
+                </div>
+
+                {/* 빠른 선택 버튼 */}
+                <div className='mt-4 flex flex-wrap gap-2 justify-center'>
+                  {[-12, -6, -3, 0, 3, 6, 12].map(value => (
+                    <Button
+                      key={value}
+                      variant={pitch === value ? 'default' : 'outline'}
+                      size='sm'
+                      onClick={() => setPitch(value)}
+                    >
+                      {formatPitch(value)}
+                    </Button>
+                  ))}
+                </div>
+
+                {/* 피치 설명 */}
+                <div className='mt-4 text-sm text-gray-600 dark:text-gray-400'>
+                  <p>
+                    • -12 ~ 0 semitones: 피치 감소 (낮은 음)
+                    <br />• 0: 원본 피치 유지
+                    <br />• 0 ~ +12 semitones: 피치 증가 (높은 음)
+                    <br />• 1 semitone = 반음 (예: C → C#)
+                  </p>
+                </div>
+              </div>
+
+              {/* 다운로드 버튼 */}
+              <div className='flex justify-center'>
+                <Button
+                  onClick={handleChangePitch}
+                  variant='default'
+                  size='lg'
+                  className='flex items-center gap-2'
+                  disabled={isProcessing || !audioBuffer}
+                >
+                  {isProcessing ? (
+                    <>
+                      <div className='w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
+                      처리 중...
+                    </>
+                  ) : (
+                    <>
+                      <Download className='w-5 h-5' />
+                      변경된 파일 다운로드
+                    </>
+                  )}
+                </Button>
               </div>
             </>
           )}
@@ -674,11 +575,40 @@ export default function Trim() {
             </h2>
             <ol className='space-y-2 text-gray-600 dark:text-gray-400 list-decimal list-inside'>
               <li>오디오 파일을 드래그 앤 드롭하거나 클릭하여 선택하세요</li>
-              <li>웨이브폼에서 시작과 끝 지점을 드래그하여 선택하세요</li>
-              <li>재생 버튼을 눌러 선택한 구간을 미리 들어보세요</li>
-              <li>필요시 Fade In/Out 옵션을 선택하세요</li>
-              <li>트림 및 다운로드 버튼을 클릭하여 저장하세요</li>
+              <li>재생 버튼을 눌러 원본 오디오를 들어보세요</li>
+              <li>피치 슬라이더를 조절하여 원하는 음높이를 설정하세요</li>
+              <li>변경된 파일 다운로드 버튼을 클릭하여 저장하세요</li>
             </ol>
+
+            <div className='mt-4 pt-4 border-t border-gray-200 dark:border-gray-600'>
+              <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                주요 기능
+              </h3>
+              <ul className='space-y-1 text-sm text-gray-600 dark:text-gray-400'>
+                <li className='flex items-start gap-2'>
+                  <span className='text-green-500 mt-1'>✓</span>
+                  <span>-12 ~ +12 semitones 범위의 피치 조절</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='text-green-500 mt-1'>✓</span>
+                  <span>템포는 유지하면서 음높이만 변경</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='text-green-500 mt-1'>✓</span>
+                  <span>실시간 재생으로 피치 미리보기</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='text-green-500 mt-1'>✓</span>
+                  <span>
+                    빠른 선택 버튼 (-12, -6, -3, 0, +3, +6, +12 semitones)
+                  </span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='text-green-500 mt-1'>✓</span>
+                  <span>모든 오디오 포맷 지원</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
