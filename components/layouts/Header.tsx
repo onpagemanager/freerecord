@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 const menuItems = [
   { name: '녹음기', href: '/record' },
@@ -41,32 +42,42 @@ export default function Header() {
   }, []);
 
   return (
-    <header className='fixed top-0 left-0 right-0 z-50 bg-gray-900/80 backdrop-blur-sm border-b border-gray-800'>
-      <div className='container mx-auto px-4'>
-        <div className='flex items-center justify-between h-20'>
-          {/* 로고 */}
-          <Link href='/' className='flex items-center space-x-1'>
+    <header className='sticky top-0 left-0 right-0 z-50 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800'>
+      <div className='w-full px-4 sm:px-6 lg:px-8'>
+        <div className='flex items-center h-20'>
+          {/* 로고 - 왼쪽 */}
+          <Link href='/' className='flex items-center space-x-1 shrink-0'>
             <Image
-              src='/logo_w.png'
+              src='/logo.png'
               alt='freerecorder'
               width={200}
               height={80}
+              className='dark:invert'
             />
           </Link>
-          <nav className='hidden lg:flex items-center space-x-8'>
+
+          {/* 메뉴 - 중앙 */}
+          <nav className='hidden lg:flex items-center justify-center flex-1 space-x-8'>
             {menuItems.map(item => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`hover:text-white font-medium transition-colors duration-200 relative group ${
-                  isScrolled ? 'text-gray-200/60' : 'text-gray-200'
+                className={`hover:text-gray-900 dark:hover:text-white font-medium transition-colors duration-200 relative group ${
+                  isScrolled
+                    ? 'text-gray-600 dark:text-gray-400'
+                    : 'text-gray-700 dark:text-gray-300'
                 }`}
               >
                 {item.name}
-                <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-200'></span>
+                <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-gray-900 dark:bg-white group-hover:w-full transition-all duration-200'></span>
               </Link>
             ))}
           </nav>
+
+          {/* 다크모드 토글 - 오른쪽 */}
+          <div className='shrink-0 ml-auto'>
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </header>

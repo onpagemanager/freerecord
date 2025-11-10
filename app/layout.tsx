@@ -4,6 +4,7 @@ import './globals.css';
 // Header와 Footer 컴포넌트 import
 import Header from '../components/layouts/Header';
 import Footer from '../components/layouts/Footer';
+import { ThemeProvider } from '../components/theme-provider';
 
 // NotoSansKR 폰트 설정 - 모든 페이지에 적용
 const notoSansKr = Noto_Sans_KR({
@@ -25,11 +26,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='ko'>
+    <html lang='ko' suppressHydrationWarning>
       <body className={`${notoSansKr.className} antialiased`}>
-        <Header />
-        <main className='container mx-auto py-20'>{children}</main>
-        <Footer />
+        <ThemeProvider
+          attribute='class'
+          defaultTheme='system'
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Header />
+          <main className='container'>{children}</main>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );
