@@ -10,6 +10,8 @@ import {
   Scissors,
   Volume2,
   Music,
+  CheckCircle2,
+  Circle,
 } from 'lucide-react';
 
 export default function Trim() {
@@ -27,6 +29,45 @@ export default function Trim() {
   const [fadeOut, setFadeOut] = useState(false); // Fade out 옵션
   const [isProcessing, setIsProcessing] = useState(false); // 처리 중 여부
   const [error, setError] = useState<string | null>(null);
+  
+  // 단계별 완료 상태 추적
+  const [stepCompleted, setStepCompleted] = useState({
+    step1: false, // 파일 업로드
+    step2: false, // 구간 선택
+    step3: false, // 재생 확인
+    step4: false, // Fade 옵션 (선택사항이므로 항상 true로 간주)
+    step5: false, // 트림 및 다운로드
+  });
+  
+  // 구간이 선택되었는지 확인 (전체 구간이 아닌 경우)
+  const isRangeSelected = startTime > 0 || endTime < duration;
+
+  // 단계별 완료 상태 업데이트
+  useEffect(() => {
+    // 1단계: 파일 업로드 완료
+    if (audioFile && audioBuffer) {
+      setStepCompleted(prev => ({ ...prev, step1: true }));
+    } else {
+      setStepCompleted(prev => ({ ...prev, step1: false }));
+    }
+  }, [audioFile, audioBuffer]);
+
+  useEffect(() => {
+    // 2단계: 구간 선택 완료 (전체가 아닌 경우)
+    if (audioBuffer && isRangeSelected) {
+      setStepCompleted(prev => ({ ...prev, step2: true }));
+    } else if (audioBuffer && !isRangeSelected) {
+      // 전체 구간이면 아직 선택 안한 것으로 간주
+      setStepCompleted(prev => ({ ...prev, step2: false }));
+    }
+  }, [audioBuffer, isRangeSelected, startTime, endTime, duration]);
+
+  // 4단계: Fade 옵션은 선택사항이므로 항상 완료로 간주
+  useEffect(() => {
+    if (audioBuffer) {
+      setStepCompleted(prev => ({ ...prev, step4: true }));
+    }
+  }, [audioBuffer]);
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +91,15 @@ export default function Trim() {
   const handleFileSelect = async (file: File) => {
     setError(null);
     setAudioFile(file);
+    
+    // 단계 상태 초기화
+    setStepCompleted({
+      step1: false,
+      step2: false,
+      step3: false,
+      step4: false,
+      step5: false,
+    });
 
     // 기존 오디오 정리
     if (audioRef.current) {
@@ -272,7 +322,11 @@ export default function Trim() {
       }
 
       const audio = audioRef.current;
-      audio.currentTime = Math.max(startTime, currentTime);
+      
+      // 재생 버튼을 누를 때마다 항상 시작점에서 재생
+      const playTime = startTime;
+      setCurrentTime(startTime);
+      audio.currentTime = playTime;
       audio.play();
 
       // 재생 위치 추적
@@ -294,6 +348,9 @@ export default function Trim() {
       }, 100);
 
       setIsPlaying(true);
+      
+      // 3단계: 재생 확인 완료
+      setStepCompleted(prev => ({ ...prev, step3: true }));
     }
   };
 
@@ -361,6 +418,9 @@ export default function Trim() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      
+      // 5단계: 트림 및 다운로드 완료
+      setStepCompleted(prev => ({ ...prev, step5: true }));
     } catch (err) {
       setError('오디오 트림 중 오류가 발생했습니다.');
       console.error('Trim error:', err);
@@ -487,6 +547,114 @@ export default function Trim() {
             </div>
           )}
 
+          {/* 단계별 진행 상태 */}
+          {audioFile && audioBuffer && (
+            <div className='mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700/50 dark:to-gray-600/50 rounded-xl border border-blue-200 dark:border-gray-600'>
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-4'>
+                진행 단계
+              </h3>
+              <div className='space-y-3'>
+                {/* 1단계: 파일 업로드 */}
+                <div className='flex items-center gap-3'>
+                  {stepCompleted.step1 ? (
+                    <CheckCircle2 className='w-5 h-5 text-green-500 flex-shrink-0' />
+                  ) : (
+                    <Circle className='w-5 h-5 text-gray-400 flex-shrink-0' />
+                  )}
+                  <span
+                    className={`text-sm ${
+                      stepCompleted.step1
+                        ? 'text-green-700 dark:text-green-400 font-medium'
+                        : 'text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    1. 오디오 파일을 드래그 앤 드롭하거나 클릭하여 선택하세요
+                  </span>
+                </div>
+
+                {/* 2단계: 구간 선택 */}
+                <div className='flex items-center gap-3'>
+                  {stepCompleted.step2 ? (
+                    <CheckCircle2 className='w-5 h-5 text-green-500 flex-shrink-0' />
+                  ) : (
+                    <Circle className='w-5 h-5 text-gray-400 flex-shrink-0' />
+                  )}
+                  <span
+                    className={`text-sm ${
+                      stepCompleted.step2
+                        ? 'text-green-700 dark:text-green-400 font-medium'
+                        : stepCompleted.step1
+                        ? 'text-gray-900 dark:text-gray-200'
+                        : 'text-gray-500 dark:text-gray-500'
+                    }`}
+                  >
+                    2. 웨이브폼에서 시작과 끝 지점을 드래그하여 선택하세요
+                  </span>
+                </div>
+
+                {/* 3단계: 재생 확인 */}
+                <div className='flex items-center gap-3'>
+                  {stepCompleted.step3 ? (
+                    <CheckCircle2 className='w-5 h-5 text-green-500 flex-shrink-0' />
+                  ) : (
+                    <Circle className='w-5 h-5 text-gray-400 flex-shrink-0' />
+                  )}
+                  <span
+                    className={`text-sm ${
+                      stepCompleted.step3
+                        ? 'text-green-700 dark:text-green-400 font-medium'
+                        : stepCompleted.step2
+                        ? 'text-gray-900 dark:text-gray-200'
+                        : 'text-gray-500 dark:text-gray-500'
+                    }`}
+                  >
+                    3. 재생 버튼을 눌러 선택한 구간을 미리 들어보세요
+                  </span>
+                </div>
+
+                {/* 4단계: Fade 옵션 */}
+                <div className='flex items-center gap-3'>
+                  {stepCompleted.step4 ? (
+                    <CheckCircle2 className='w-5 h-5 text-green-500 flex-shrink-0' />
+                  ) : (
+                    <Circle className='w-5 h-5 text-gray-400 flex-shrink-0' />
+                  )}
+                  <span
+                    className={`text-sm ${
+                      stepCompleted.step4
+                        ? 'text-green-700 dark:text-green-400 font-medium'
+                        : stepCompleted.step3
+                        ? 'text-gray-900 dark:text-gray-200'
+                        : 'text-gray-500 dark:text-gray-500'
+                    }`}
+                  >
+                    4. 필요시 Fade In/Out 옵션을 선택하세요 (선택사항)
+                  </span>
+                </div>
+
+                {/* 5단계: 트림 및 다운로드 */}
+                <div className='flex items-center gap-3'>
+                  {stepCompleted.step5 ? (
+                    <CheckCircle2 className='w-5 h-5 text-green-500 flex-shrink-0' />
+                  ) : (
+                    <Circle className='w-5 h-5 text-gray-400 flex-shrink-0' />
+                  )}
+                  <span
+                    className={`text-sm ${
+                      stepCompleted.step5
+                        ? 'text-green-700 dark:text-green-400 font-medium'
+                        : stepCompleted.step3
+                        ? 'text-gray-900 dark:text-gray-200'
+                        : 'text-gray-500 dark:text-gray-500'
+                    }`}
+                  >
+                    5. 트림 및 다운로드 버튼을 클릭하여 저장하세요
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 파일 업로드 영역 */}
           {!audioFile && (
             <div
@@ -545,6 +713,16 @@ export default function Trim() {
                       setEndTime(0);
                       setCurrentTime(0);
                       setIsPlaying(false);
+                      
+                      // 단계 상태 초기화
+                      setStepCompleted({
+                        step1: false,
+                        step2: false,
+                        step3: false,
+                        step4: false,
+                        step5: false,
+                      });
+                      
                       if (audioRef.current) {
                         audioRef.current.pause();
                         audioRef.current = null;

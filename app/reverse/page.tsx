@@ -26,6 +26,7 @@ export default function Reverse() {
   const [currentTime, setCurrentTime] = useState(0);
   const [isReversed, setIsReversed] = useState(false); // 역방향 여부
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState(0); // 처리 진행률 (0-100)
   const [error, setError] = useState<string | null>(null);
 
   // Refs
@@ -46,6 +47,14 @@ export default function Reverse() {
   // 파일 선택 핸들러
   const handleFileSelect = async (file: File) => {
     setError(null);
+    
+    // 파일 크기 제한 체크 (50MB)
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (file.size > maxSize) {
+      setError('파일 크기는 50MB를 초과할 수 없습니다.');
+      return;
+    }
+    
     setAudioFile(file);
 
     // 기존 오디오 정리
@@ -92,13 +101,14 @@ export default function Reverse() {
     }
   };
 
-  // 역방향 오디오 생성
+  // 역방향 오디오 생성 (진행률 표시 포함)
   const createReversedAudio = async (
     buffer: AudioBuffer,
     audioContext: AudioContext
   ) => {
     try {
       setIsProcessing(true);
+      setProcessingProgress(0);
 
       // 새로운 AudioBuffer 생성 (동일한 속성)
       const numberOfChannels = buffer.numberOfChannels;
@@ -110,29 +120,49 @@ export default function Reverse() {
         sampleRate
       );
 
-      // 각 채널의 데이터를 역순으로 복사
+      // 각 채널의 데이터를 역순으로 복사 (진행률 업데이트)
+      const totalChannels = numberOfChannels;
       for (let channel = 0; channel < numberOfChannels; channel++) {
         const originalData = buffer.getChannelData(channel);
         const channelData = new Float32Array(originalData);
         const reversedData = reversedBuffer.getChannelData(channel);
 
-        // 역순으로 복사
-        for (let i = 0; i < length; i++) {
-          reversedData[i] = channelData[length - 1 - i];
+        // 역순으로 복사 (청크 단위로 처리하여 진행률 업데이트)
+        const chunkSize = Math.max(1000, Math.floor(length / 100)); // 100개 청크로 나눔
+        for (let i = 0; i < length; i += chunkSize) {
+          const end = Math.min(i + chunkSize, length);
+          for (let j = i; j < end; j++) {
+            reversedData[j] = channelData[length - 1 - j];
+          }
+          
+          // 진행률 업데이트 (채널 처리 + 청크 처리)
+          const channelProgress = (channel / totalChannels) * 100;
+          const chunkProgress = ((i + chunkSize) / length) * (100 / totalChannels);
+          setProcessingProgress(Math.min(100, channelProgress + chunkProgress));
+          
+          // UI 업데이트를 위한 짧은 지연
+          await new Promise(resolve => setTimeout(resolve, 0));
         }
       }
 
       setReversedBuffer(reversedBuffer);
+      setProcessingProgress(90);
 
       // WAV로 변환하여 URL 생성
       const wavBlob = audioBufferToWav(reversedBuffer);
       const reversedUrl = URL.createObjectURL(wavBlob);
       setReversedAudioUrl(reversedUrl);
+      
+      setProcessingProgress(100);
+      
+      // 완료 후 잠시 대기
+      await new Promise(resolve => setTimeout(resolve, 200));
     } catch (err) {
       setError('역방향 오디오 생성 중 오류가 발생했습니다.');
       console.error('Reverse audio error:', err);
     } finally {
       setIsProcessing(false);
+      setProcessingProgress(0);
     }
   };
 
@@ -216,7 +246,15 @@ export default function Reverse() {
         }
 
         const audio = audioRef.current;
-        audio.currentTime = currentTime;
+        
+        // 재생 완료 후 재시작: currentTime이 duration과 같거나 거의 같으면 처음부터 재생
+        let playTime = currentTime;
+        if (Math.abs(currentTime - duration) < 0.1) {
+          playTime = 0;
+          setCurrentTime(0);
+        }
+        
+        audio.currentTime = playTime;
 
         // 재생 시도
         await audio.play();
@@ -375,10 +413,10 @@ export default function Reverse() {
           {/* 제목 */}
           <div className='text-center mb-8'>
             <h1 className='text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2'>
-              오디오 역방향
+              오디오 파일을 거꾸로 재생해보세요!
             </h1>
             <p className='text-gray-600 dark:text-gray-400'>
-              오디오 파일을 역방향으로 재생하도록 변환하세요
+              오디오 파일을 역방향으로 재생하도록 쉽게 변환할 수 있습니다
             </p>
           </div>
 
@@ -401,8 +439,11 @@ export default function Reverse() {
               <p className='text-lg font-medium text-gray-700 dark:text-gray-300 mb-2'>
                 파일을 드래그 앤 드롭하거나 클릭하여 선택
               </p>
-              <p className='text-sm text-gray-500 dark:text-gray-400'>
+              <p className='text-sm text-gray-500 dark:text-gray-400 mb-2'>
                 MP3, WAV, OGG 등 오디오 파일 지원
+              </p>
+              <p className='text-xs text-gray-400 dark:text-gray-500'>
+                최대 파일 사이즈 50MB
               </p>
               <input
                 ref={fileInputRef}
@@ -419,13 +460,27 @@ export default function Reverse() {
             </div>
           )}
 
-          {/* 처리 중 표시 */}
+          {/* 처리 중 표시 (진행률 포함) */}
           {isProcessing && (
-            <div className='mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg'>
-              <div className='flex items-center justify-center gap-3'>
-                <div className='w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin'></div>
-                <p className='text-blue-800 dark:text-blue-200 text-sm'>
-                  역방향 오디오 생성 중...
+            <div className='mb-6 p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg'>
+              <div className='space-y-4'>
+                <div className='flex items-center justify-center gap-3'>
+                  <div className='w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin'></div>
+                  <p className='text-blue-800 dark:text-blue-200 text-sm font-medium'>
+                    역방향 오디오 생성 중...
+                  </p>
+                </div>
+                {/* 진행률 바 */}
+                <div className='w-full bg-blue-200 dark:bg-blue-800 rounded-full h-3 overflow-hidden'>
+                  <div
+                    className='bg-blue-600 dark:bg-blue-400 h-3 rounded-full transition-all duration-300 ease-out'
+                    style={{
+                      width: `${processingProgress}%`,
+                    }}
+                  />
+                </div>
+                <p className='text-center text-blue-700 dark:text-blue-300 text-sm font-semibold'>
+                  {Math.round(processingProgress)}%
                 </p>
               </div>
             </div>
@@ -577,6 +632,24 @@ export default function Reverse() {
 
             <div className='mt-4 pt-4 border-t border-gray-200 dark:border-gray-600'>
               <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                지원하는 오디오 포맷
+              </h3>
+              <div className='grid grid-cols-2 md:grid-cols-5 gap-2 text-sm text-gray-600 dark:text-gray-400'>
+                <div>• MP3</div>
+                <div>• WAV</div>
+                <div>• OGG</div>
+                <div>• M4A</div>
+                <div>• AAC</div>
+                <div>• FLAC</div>
+                <div>• WMA</div>
+                <div>• M4R</div>
+                <div>• AMR</div>
+                <div>• AIF</div>
+              </div>
+            </div>
+            
+            <div className='mt-4 pt-4 border-t border-gray-200 dark:border-gray-600'>
+              <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
                 주요 기능
               </h3>
               <ul className='space-y-1 text-sm text-gray-600 dark:text-gray-400'>
@@ -598,9 +671,32 @@ export default function Reverse() {
                 </li>
                 <li className='flex items-start gap-2'>
                   <span className='text-green-500 mt-1'>✓</span>
-                  <span>모든 오디오 포맷 지원</span>
+                  <span>진행률 표시로 처리 상태 확인</span>
                 </li>
               </ul>
+            </div>
+            
+            <div className='mt-4 pt-4 border-t border-gray-200 dark:border-gray-600'>
+              <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                영감을 얻어 보세요!
+              </h3>
+              <p className='text-sm text-gray-600 dark:text-gray-400 leading-relaxed'>
+                음악을 완전히 다른 방법으로 경험해 보세요! 여러분이 뮤지션이나 독창적인 아티스트라면 
+                여러분의 다음 프로젝트를 위한 영감을 얻기 위해 이 툴을 사용하실 수 있습니다. 
+                거꾸로 재생된 음악의 무질서한 체계와 기괴한 음향들이 여러분이 이전에 한번도 들어보지 못한 
+                작품을 창작할 수 있도록 영감을 줄 겁니다!
+              </p>
+            </div>
+            
+            <div className='mt-4 pt-4 border-t border-gray-200 dark:border-gray-600'>
+              <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                리버스 사운드 효과를 만들어 보세요
+              </h3>
+              <p className='text-sm text-gray-600 dark:text-gray-400 leading-relaxed'>
+                리버스 심벌 또는 노이즈 라이저와 같은 리버스 사운드 효과는 최근 오디오 프로덕션에서 
+                광범위하게 사용되고 있습니다. 이 무료 온라인 툴을 이용해 놀라운 리버스 사운드 효과를 
+                만들 수 있습니다. 다양한 짧은 오디오 클립을 리버스 사운드로 변환해 보세요.
+              </p>
             </div>
           </div>
         </div>

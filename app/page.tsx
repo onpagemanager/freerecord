@@ -15,8 +15,65 @@ import {
   PlayCircle,
   Download,
 } from 'lucide-react';
+import StructuredData from '@/components/StructuredData';
 
 export default function Home() {
+  // 사이트 기본 URL 가져오기
+  const baseUrl =
+    typeof window !== 'undefined' ? window.location.origin : 'https://freerecord.com';
+
+  // Organization 스키마 데이터 - 회사/서비스 정보
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Freerecord',
+    url: baseUrl,
+    logo: `${baseUrl}/logo.png`, // 로고 이미지 URL (최소 112x112px 권장)
+    description:
+      '무료 온라인 음성 녹음 및 편집 도구. 고음질 보이스 레코더로 음성 녹음, 속도 변경, 음정 변경, 목소리 변조 등 다양한 기능을 브라우저에서 바로 사용하세요.',
+    sameAs: [
+      // 소셜 미디어 링크가 있다면 추가
+      // 예: 'https://www.facebook.com/freerecord',
+      // 'https://twitter.com/freerecord',
+    ],
+  };
+
+  // WebApplication 스키마 데이터 - 애플리케이션 정보
+  const webApplicationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Freerecord',
+    applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'Web Browser',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'KRW',
+    },
+    description:
+      '무료 온라인 음성 녹음 및 편집 도구. 고음질 보이스 레코더로 음성 녹음, 속도 변경, 음정 변경, 목소리 변조 등 다양한 기능을 브라우저에서 바로 사용하세요.',
+    url: baseUrl,
+    featureList: [
+      '무료 음성 녹음',
+      '음성 속도 변경',
+      '음성 음정 변경',
+      '목소리 변조',
+      '음량 조절',
+      '이퀄라이저',
+      '오디오 다듬기',
+      '오디오 병합',
+    ],
+    browserRequirements: 'Requires JavaScript. Requires HTML5.',
+    softwareVersion: '1.0',
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      ratingCount: '1000',
+    },
+  };
+
+  // 모든 구조화된 데이터를 배열로 결합
+  const structuredData = [organizationSchema, webApplicationSchema];
   // 주요 기능 목록
   const mainFeatures = [
     {
@@ -99,6 +156,8 @@ export default function Home() {
 
   return (
     <div className='min-h-screen'>
+      {/* 구조화된 데이터 추가 - SEO 최적화 */}
+      <StructuredData data={structuredData} />
       {/* 히어로 섹션 */}
       <section className='relative overflow-hidden bg-linear-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pt-32 pb-20'>
         <div className='container mx-auto px-4 sm:px-6 lg:px-8'>

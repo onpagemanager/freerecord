@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { Menu, X } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 const menuItems = [
@@ -21,6 +22,7 @@ const menuItems = [
 // Header 컴포넌트 - 모든 페이지 상단에 표시
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // 스크롤 이벤트 감지
   useEffect(() => {
@@ -74,12 +76,46 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* 다크모드 토글 - 오른쪽 */}
-          <div className='shrink-0 ml-auto'>
+          {/* 오른쪽 - 모바일 메뉴 버튼 및 다크모드 토글 */}
+          <div className='shrink-0 ml-auto flex items-center gap-2'>
+            {/* 모바일 메뉴 버튼 - lg 이하에서만 표시 */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className='lg:hidden p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors'
+              aria-label='메뉴 열기'
+            >
+              {isMobileMenuOpen ? (
+                <X className='w-6 h-6' />
+              ) : (
+                <Menu className='w-6 h-6' />
+              )}
+            </button>
             <ThemeToggle />
           </div>
         </div>
       </div>
+
+      {/* 모바일 메뉴 - lg 이하에서만 표시 */}
+      {isMobileMenuOpen && (
+        <div className='lg:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900'>
+          <nav className='px-4 py-4 space-y-2'>
+            {menuItems.map(item => (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`block px-4 py-3 rounded-lg font-medium transition-colors duration-200 ${
+                  isScrolled
+                    ? 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

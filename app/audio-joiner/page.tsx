@@ -198,7 +198,15 @@ export default function AudioJoiner() {
         }
 
         const audio = audioRef.current;
-        audio.currentTime = currentTime;
+
+        // 재생 완료 후 재시작: currentTime이 totalDuration과 같거나 거의 같으면 처음부터 재생
+        let playTime = currentTime;
+        if (Math.abs(currentTime - totalDuration) < 0.1) {
+          playTime = 0;
+          setCurrentTime(0);
+        }
+
+        audio.currentTime = playTime;
         audio.play();
 
         // 재생 위치 추적
@@ -504,7 +512,7 @@ export default function AudioJoiner() {
           {/* 제목 */}
           <div className='text-center mb-8'>
             <h1 className='text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2'>
-              오디오 조인
+              오디오 병합
             </h1>
             <p className='text-gray-600 dark:text-gray-400'>
               여러 오디오 파일을 하나로 병합하세요

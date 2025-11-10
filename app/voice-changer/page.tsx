@@ -11,6 +11,7 @@ import {
   RotateCcw,
   Mic,
   Square,
+  Settings,
 } from 'lucide-react';
 
 // 음성 효과 타입 정의
@@ -20,11 +21,16 @@ type VoiceEffect =
   | 'high'
   | 'robot'
   | 'echo'
-  | 'reverse'
-  | 'telephone'
   | 'alien'
   | 'monster'
-  | 'reverb';
+  | 'reverb'
+  | 'chipmunk'
+  | 'helium'
+  | 'radio'
+  | 'walkie'
+  | 'megaphone'
+  | 'underwater'
+  | 'chorus';
 
 // 효과 정보
 const VOICE_EFFECTS: {
@@ -35,17 +41,58 @@ const VOICE_EFFECTS: {
   { id: 'none', name: '원본', description: '효과 없음' },
   { id: 'deep', name: '깊은 음성', description: '음성을 깊게 만듭니다' },
   { id: 'high', name: '높은 음성', description: '음성을 높게 만듭니다' },
+  {
+    id: 'chipmunk',
+    name: '다람쥐',
+    description: '다람쥐처럼 귀여운 높은 음성',
+  },
+  {
+    id: 'helium',
+    name: '헬륨',
+    description: '헬륨을 마신 것처럼 매우 높은 음성',
+  },
   { id: 'robot', name: '로봇 음성', description: '로봇처럼 메탈릭한 음성' },
   { id: 'echo', name: '에코', description: '에코 효과를 추가합니다' },
-  { id: 'reverse', name: '역방향', description: '오디오를 역방향으로 재생' },
-  { id: 'telephone', name: '전화기', description: '전화기 음성 효과' },
+  { id: 'reverb', name: '리버브', description: '공간감을 주는 리버브 효과' },
+  { id: 'chorus', name: '코러스', description: '여러 목소리가 합쳐진 효과' },
+  { id: 'radio', name: '라디오', description: 'AM 라디오 음성 효과' },
+  { id: 'walkie', name: '무전기', description: '무전기 통신 음성 효과' },
+  { id: 'megaphone', name: '확성기', description: '확성기로 말하는 효과' },
+  { id: 'underwater', name: '수중', description: '물속에서 말하는 효과' },
   { id: 'alien', name: '외계인', description: '워블링 외계인 음성' },
   { id: 'monster', name: '몬스터', description: '깊고 왜곡된 몬스터 음성' },
-  { id: 'reverb', name: '리버브', description: '공간감을 주는 리버브 효과' },
 ];
 
 // 녹음 상태 타입
 type RecordingState = 'idle' | 'recording' | 'recorded';
+
+// 이퀄라이저 밴드 정의 (주파수와 라벨)
+const EQ_BANDS = [
+  { freq: 60, label: '60Hz' },
+  { freq: 170, label: '170Hz' },
+  { freq: 310, label: '310Hz' },
+  { freq: 600, label: '600Hz' },
+  { freq: 1000, label: '1kHz' },
+  { freq: 3000, label: '3kHz' },
+  { freq: 6000, label: '6kHz' },
+  { freq: 12000, label: '12kHz' },
+  { freq: 14000, label: '14kHz' },
+  { freq: 16000, label: '16kHz' },
+];
+
+// 프리셋 정의
+const PRESETS = {
+  flat: { name: 'Flat', values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  bass: { name: 'Bass Boost', values: [6, 4, 2, 0, 0, 0, 0, 0, 0, 0] },
+  treble: { name: 'Treble Boost', values: [0, 0, 0, 0, 0, 0, 2, 4, 6, 6] },
+  vocal: { name: 'Vocal', values: [-2, -1, 0, 2, 4, 4, 2, 0, -1, -2] },
+  rock: { name: 'Rock', values: [4, 2, -1, -2, 0, 2, 3, 4, 4, 4] },
+  pop: { name: 'Pop', values: [-1, 0, 2, 3, 3, 2, 0, -1, -1, -1] },
+  jazz: { name: 'Jazz', values: [2, 1, 0, 1, 2, 2, 1, 0, 1, 2] },
+  classical: { name: 'Classical', values: [0, 0, 0, 0, 0, 0, -1, -2, -2, -2] },
+};
+
+type PresetKey = keyof typeof PRESETS;
 
 export default function VoiceChanger() {
   // 상태 관리
@@ -64,6 +111,12 @@ export default function VoiceChanger() {
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 
+  // 이퀄라이저 관련 상태
+  const [eqValues, setEqValues] = useState<number[]>(
+    new Array(EQ_BANDS.length).fill(0)
+  ); // 각 밴드의 gain 값 (-12 ~ +12 dB)
+  const [selectedPreset, setSelectedPreset] = useState<PresetKey | null>(null);
+
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -74,6 +127,11 @@ export default function VoiceChanger() {
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const filterNodesRef = useRef<BiquadFilterNode[]>([]);
+  const gainNodeRef = useRef<GainNode | null>(null);
 
   // 시간 포맷팅 (MM:SS)
   const formatTime = (seconds: number): string => {
@@ -82,6 +140,162 @@ export default function VoiceChanger() {
     return `${mins.toString().padStart(2, '0')}:${secs
       .toString()
       .padStart(2, '0')}`;
+  };
+
+  // 웨이브 그리기 함수 (개선된 시각 효과)
+  const drawWaveform = () => {
+    const canvas = canvasRef.current;
+    if (!canvas || !analyserRef.current) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const analyser = analyserRef.current;
+    const bufferLength = analyser.frequencyBinCount;
+    const timeDataArray = new Uint8Array(bufferLength);
+    const frequencyDataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    const draw = () => {
+      animationFrameRef.current = requestAnimationFrame(draw);
+
+      // 시간 도메인 데이터 (웨이브폼)
+      analyser.getByteTimeDomainData(timeDataArray);
+      // 주파수 도메인 데이터 (스펙트럼)
+      analyser.getByteFrequencyData(frequencyDataArray);
+
+      // 배경 그리기 (그라데이션 효과)
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, 'rgba(15, 23, 42, 0.95)');
+      gradient.addColorStop(0.5, 'rgba(30, 41, 59, 0.9)');
+      gradient.addColorStop(1, 'rgba(15, 23, 42, 0.95)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 기준선 그리기 (중앙)
+      ctx.strokeStyle = 'rgba(34, 211, 238, 0.3)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height / 2);
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.stroke();
+
+      // 주파수 스펙트럼 막대 그래프 (하단)
+      const barCount = 64; // 표시할 막대 개수
+      const barWidth = canvas.width / barCount;
+      const spectrumHeight = canvas.height * 0.3; // 스펙트럼 영역 높이
+
+      for (let i = 0; i < barCount; i++) {
+        const dataIndex = Math.floor(
+          (i / barCount) * frequencyDataArray.length
+        );
+        const barHeight =
+          (frequencyDataArray[dataIndex] / 255) * spectrumHeight;
+
+        // 그라데이션 색상 (주파수에 따라)
+        const hue = (i / barCount) * 180 + 180; // 청록색에서 파란색으로
+        const saturation = 70 + (frequencyDataArray[dataIndex] / 255) * 30;
+        const lightness = 50 + (frequencyDataArray[dataIndex] / 255) * 20;
+
+        ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        ctx.fillRect(
+          i * barWidth,
+          canvas.height - barHeight,
+          barWidth - 1,
+          barHeight
+        );
+
+        // 반사 효과 (상단에도 미러링)
+        ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, 0.3)`;
+        ctx.fillRect(i * barWidth, 0, barWidth - 1, barHeight * 0.5);
+      }
+
+      // 웨이브폼 그리기 (중앙 라인)
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+
+      const sliceWidth = canvas.width / bufferLength;
+      let x = 0;
+
+      // 그라데이션 스트로크
+      const waveGradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+      waveGradient.addColorStop(0, '#22d3ee');
+      waveGradient.addColorStop(0.5, '#06b6d4');
+      waveGradient.addColorStop(1, '#22d3ee');
+      ctx.strokeStyle = waveGradient;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const v = timeDataArray[i] / 128.0;
+        const y = canvas.height / 2 + (v * canvas.height) / 4;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+      }
+
+      ctx.stroke();
+
+      // 웨이브폼 채우기 (그라데이션)
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.lineTo(0, canvas.height / 2);
+      ctx.closePath();
+
+      const fillGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      fillGradient.addColorStop(0, 'rgba(34, 211, 238, 0.1)');
+      fillGradient.addColorStop(0.5, 'rgba(6, 182, 212, 0.2)');
+      fillGradient.addColorStop(1, 'rgba(34, 211, 238, 0.1)');
+      ctx.fillStyle = fillGradient;
+      ctx.fill();
+
+      // 상단 웨이브폼 (미러링)
+      ctx.beginPath();
+      x = 0;
+      for (let i = 0; i < bufferLength; i++) {
+        const v = timeDataArray[i] / 128.0;
+        const y = canvas.height / 2 - (v * canvas.height) / 4;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+      }
+
+      ctx.strokeStyle = 'rgba(34, 211, 238, 0.6)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    };
+
+    draw();
+  };
+
+  // 웨이브 애니메이션 중지
+  const stopWaveform = () => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        // 배경만 그리기
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // 기준선만 그리기
+        ctx.strokeStyle = 'rgba(34, 211, 238, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height / 2);
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.stroke();
+      }
+    }
   };
 
   // 파일 선택 핸들러
@@ -121,6 +335,8 @@ export default function VoiceChanger() {
       setDuration(length);
       setCurrentTime(0);
       setSelectedEffect('none');
+      setEqValues(new Array(EQ_BANDS.length).fill(0));
+      setSelectedPreset(null);
     } catch (err) {
       setError('오디오 파일을 로드할 수 없습니다.');
       console.error('Audio loading error:', err);
@@ -140,6 +356,51 @@ export default function VoiceChanger() {
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+  };
+
+  // 이퀄라이저 필터 노드 생성
+  const createEQFilters = (
+    audioContext: AudioContext | OfflineAudioContext
+  ): BiquadFilterNode[] => {
+    const filters: BiquadFilterNode[] = [];
+
+    EQ_BANDS.forEach((band, index) => {
+      const filter = audioContext.createBiquadFilter();
+      filter.type = 'peaking';
+      filter.frequency.value = band.freq;
+      filter.Q.value = 1;
+      filter.gain.value = eqValues[index] || 0;
+
+      // 체인 연결
+      if (filters.length > 0) {
+        filters[filters.length - 1].connect(filter);
+      }
+
+      filters.push(filter);
+    });
+
+    return filters;
+  };
+
+  // 밴드 값 변경 핸들러
+  const handleBandChange = (index: number, value: number) => {
+    const newValues = [...eqValues];
+    newValues[index] = value;
+    setEqValues(newValues);
+    setSelectedPreset(null); // 프리셋 해제
+  };
+
+  // 프리셋 적용
+  const applyPreset = (presetKey: PresetKey) => {
+    const preset = PRESETS[presetKey];
+    setEqValues([...preset.values]);
+    setSelectedPreset(presetKey);
+  };
+
+  // 이퀄라이저 리셋
+  const resetEQ = () => {
+    setEqValues(new Array(EQ_BANDS.length).fill(0));
+    setSelectedPreset(null);
   };
 
   // 마이크 권한 요청 및 스트림 가져오기
@@ -226,6 +487,8 @@ export default function VoiceChanger() {
           setDuration(length);
           setCurrentTime(0);
           setSelectedEffect('none');
+          setEqValues(new Array(EQ_BANDS.length).fill(0));
+          setSelectedPreset(null);
           setRecordingState('recorded');
           setRecordingTime(0);
         } catch (err) {
@@ -314,19 +577,136 @@ export default function VoiceChanger() {
         output = echoGain;
         break;
 
-      case 'telephone':
-        // 전화기 음성: 고주파/저주파 제거
-        const lowPass = audioContext.createBiquadFilter();
-        lowPass.type = 'lowpass';
-        lowPass.frequency.value = 3000;
+      case 'chipmunk':
+        // 다람쥐 음성: 매우 높은 피치
+        source.detune.value = 2400; // +24 semitones (2옥타브)
+        output = source;
+        break;
 
-        const highPass = audioContext.createBiquadFilter();
-        highPass.type = 'highpass';
-        highPass.frequency.value = 300;
+      case 'helium':
+        // 헬륨 음성: 극도로 높은 피치 (원본 길이 유지)
+        // detune은 피치만 변경하고 속도는 변경하지 않으므로 playbackRate는 1.0 유지
+        source.detune.value = 2400; // +24 semitones (2옥타브) - 더 자연스러운 헬륨 효과
+        source.playbackRate.value = 1.0; // 원본 속도 유지
+        output = source;
+        break;
 
-        source.connect(highPass);
-        highPass.connect(lowPass);
-        output = lowPass;
+      case 'radio':
+        // 라디오 음성: AM 라디오 효과 (밴드패스 필터 + 약간의 왜곡)
+        const radioBandpass = audioContext.createBiquadFilter();
+        radioBandpass.type = 'bandpass';
+        radioBandpass.frequency.value = 1000;
+        radioBandpass.Q.value = 2;
+
+        const radioGain = audioContext.createGain();
+        radioGain.gain.value = 1.2;
+
+        source.connect(radioBandpass);
+        radioBandpass.connect(radioGain);
+        output = radioGain;
+        break;
+
+      case 'walkie':
+        // 무전기 음성: 좁은 대역폭 + 노이즈
+        const walkieHighPass = audioContext.createBiquadFilter();
+        walkieHighPass.type = 'highpass';
+        walkieHighPass.frequency.value = 400;
+
+        const walkieLowPass = audioContext.createBiquadFilter();
+        walkieLowPass.type = 'lowpass';
+        walkieLowPass.frequency.value = 2500;
+
+        const walkieGain = audioContext.createGain();
+        walkieGain.gain.value = 1.1;
+
+        source.connect(walkieHighPass);
+        walkieHighPass.connect(walkieLowPass);
+        walkieLowPass.connect(walkieGain);
+        output = walkieGain;
+        break;
+
+      case 'megaphone':
+        // 확성기 음성: 중간 주파수 강조 + 약간의 왜곡
+        const megaphoneBandpass = audioContext.createBiquadFilter();
+        megaphoneBandpass.type = 'bandpass';
+        megaphoneBandpass.frequency.value = 2000;
+        megaphoneBandpass.Q.value = 3;
+
+        const megaphoneGain = audioContext.createGain();
+        megaphoneGain.gain.value = 1.4;
+
+        source.connect(megaphoneBandpass);
+        megaphoneBandpass.connect(megaphoneGain);
+        output = megaphoneGain;
+        break;
+
+      case 'underwater':
+        // 수중 음성: 저주파 강조 + 리버브
+        const underwaterLowPass = audioContext.createBiquadFilter();
+        underwaterLowPass.type = 'lowpass';
+        underwaterLowPass.frequency.value = 2000;
+        underwaterLowPass.Q.value = 1;
+
+        const underwaterDelay = audioContext.createDelay(1.0);
+        underwaterDelay.delayTime.value = 0.1;
+
+        const underwaterGain = audioContext.createGain();
+        underwaterGain.gain.value = 0.3;
+
+        const underwaterOutput = audioContext.createGain();
+        underwaterOutput.gain.value = 0.8;
+
+        source.connect(underwaterLowPass);
+        underwaterLowPass.connect(underwaterOutput);
+        underwaterLowPass.connect(underwaterDelay);
+        underwaterDelay.connect(underwaterGain);
+        underwaterGain.connect(underwaterOutput);
+        output = underwaterOutput;
+        break;
+
+      case 'chorus':
+        // 코러스 효과: 약간의 딜레이와 피치 변조
+        const chorusDelay1 = audioContext.createDelay(0.05);
+        chorusDelay1.delayTime.value = 0.015;
+
+        const chorusDelay2 = audioContext.createDelay(0.05);
+        chorusDelay2.delayTime.value = 0.025;
+
+        const chorusLFO1 = audioContext.createOscillator();
+        chorusLFO1.type = 'sine';
+        chorusLFO1.frequency.value = 1.5;
+
+        const chorusLFO2 = audioContext.createOscillator();
+        chorusLFO2.type = 'sine';
+        chorusLFO2.frequency.value = 2.0;
+
+        const chorusGain1 = audioContext.createGain();
+        chorusGain1.gain.value = 0.003;
+
+        const chorusGain2 = audioContext.createGain();
+        chorusGain2.gain.value = 0.003;
+
+        const chorusMix = audioContext.createGain();
+        chorusMix.gain.value = 0.5;
+
+        const chorusOutput = audioContext.createGain();
+        chorusOutput.gain.value = 0.7;
+
+        chorusLFO1.connect(chorusGain1);
+        chorusGain1.connect(chorusDelay1.delayTime);
+        chorusLFO1.start();
+
+        chorusLFO2.connect(chorusGain2);
+        chorusGain2.connect(chorusDelay2.delayTime);
+        chorusLFO2.start();
+
+        source.connect(chorusOutput);
+        source.connect(chorusDelay1);
+        source.connect(chorusDelay2);
+        chorusDelay1.connect(chorusMix);
+        chorusDelay2.connect(chorusMix);
+        chorusMix.connect(chorusOutput);
+        output = chorusOutput;
         break;
 
       case 'alien':
@@ -390,11 +770,6 @@ export default function VoiceChanger() {
         output = reverbOutput;
         break;
 
-      case 'reverse':
-        // 역방향은 재생 시 처리하지 않고 다운로드 시에만 처리
-        output = source;
-        break;
-
       default:
         output = source;
     }
@@ -412,6 +787,13 @@ export default function VoiceChanger() {
     if (isPlaying) {
       // 일시정지
       if (sourceRef.current) {
+        // 현재 재생 시간을 정확히 계산하여 저장
+        if (audioContextRef.current && startTimeRef.current !== null) {
+          const elapsed =
+            audioContextRef.current.currentTime - startTimeRef.current;
+          setCurrentTime(Math.min(elapsed, duration));
+        }
+
         try {
           sourceRef.current.stop();
         } catch (err) {
@@ -423,10 +805,21 @@ export default function VoiceChanger() {
         clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
       }
+      filterNodesRef.current = [];
+      gainNodeRef.current = null;
+      // 웨이브 중지
+      stopWaveform();
       setIsPlaying(false);
     } else {
       // 재생
       try {
+        // 재생 완료 후 재시작: currentTime이 duration과 같거나 거의 같으면 처음부터 재생
+        let startTime = currentTime;
+        if (Math.abs(currentTime - duration) < 0.1) {
+          startTime = 0;
+          setCurrentTime(0);
+        }
+
         // AudioContext가 없거나 닫혔으면 새로 생성
         let audioContext = audioContextRef.current;
         if (!audioContext || audioContext.state === 'closed') {
@@ -450,24 +843,45 @@ export default function VoiceChanger() {
           sourceRef.current = null;
         }
 
-        // 역방향 효과는 재생 시 처리하지 않음
-        if (selectedEffect === 'reverse') {
-          setError('역방향 효과는 다운로드 시에만 적용됩니다.');
-          return;
-        }
-
         // AudioBufferSourceNode 생성
         const source = audioContext.createBufferSource();
         source.buffer = audioBuffer;
 
         // 음성 효과 적용
-        const output = applyVoiceEffect(audioContext, source, selectedEffect);
+        let output: AudioNode = applyVoiceEffect(
+          audioContext,
+          source,
+          selectedEffect
+        );
 
-        // 최종 출력 연결
-        output.connect(audioContext.destination);
+        // 이퀄라이저 필터 생성 및 연결
+        const filters = createEQFilters(audioContext);
+        filterNodesRef.current = filters;
 
-        // 재생 시작
-        const offset = currentTime;
+        // GainNode 생성
+        const gainNode = audioContext.createGain();
+        gainNodeRef.current = gainNode;
+
+        // 연결: source -> voice effect -> filters -> gain -> analyser -> destination
+        if (filters.length > 0) {
+          output.connect(filters[0]);
+          filters[filters.length - 1].connect(gainNode);
+        } else {
+          output.connect(gainNode);
+        }
+
+        // AnalyserNode 생성 및 연결 (웨이브폼용)
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 2048;
+        analyserRef.current = analyser;
+        gainNode.connect(analyser);
+        analyser.connect(audioContext.destination);
+
+        // 웨이브 그리기 시작
+        drawWaveform();
+
+        // 재생 시작 - 저장된 startTime부터 재생
+        const offset = Math.min(startTime, duration);
         startTimeRef.current = audioContext.currentTime - offset;
         source.start(0, offset);
 
@@ -479,6 +893,10 @@ export default function VoiceChanger() {
             clearInterval(progressIntervalRef.current);
             progressIntervalRef.current = null;
           }
+          // 웨이브 중지
+          stopWaveform();
+          filterNodesRef.current = [];
+          gainNodeRef.current = null;
           // OscillatorNode 정리
           if ((source as any).modulator) {
             try {
@@ -511,9 +929,20 @@ export default function VoiceChanger() {
     }
   };
 
-  // 음성 효과 적용 및 다운로드
+  // 이퀄라이저 값 변경 시 필터 업데이트
+  useEffect(() => {
+    if (filterNodesRef.current.length > 0) {
+      filterNodesRef.current.forEach((filter, index) => {
+        if (filter && eqValues[index] !== undefined) {
+          filter.gain.value = eqValues[index];
+        }
+      });
+    }
+  }, [eqValues]);
+
+  // 음성 효과 및 이퀄라이저 적용 및 다운로드
   const handleApplyEffect = async () => {
-    if (!audioBuffer || !audioFile) return;
+    if (!audioBuffer || (!audioFile && !audioBlob)) return;
 
     setIsProcessing(true);
     setError(null);
@@ -533,38 +962,43 @@ export default function VoiceChanger() {
       const source = offlineContext.createBufferSource();
       source.buffer = audioBuffer;
 
-      let processedBuffer: AudioBuffer;
+      // 음성 효과 적용
+      let output: AudioNode = applyVoiceEffect(
+        offlineContext,
+        source,
+        selectedEffect
+      );
 
-      if (selectedEffect === 'reverse') {
-        // 역방향: AudioBuffer 직접 처리
-        const numberOfChannels = audioBuffer.numberOfChannels;
-        const length = audioBuffer.length;
-        const sampleRate = audioBuffer.sampleRate;
-        const reversedBuffer = audioContext.createBuffer(
-          numberOfChannels,
-          length,
-          sampleRate
-        );
+      // 이퀄라이저 필터 생성
+      const filters: BiquadFilterNode[] = [];
+      EQ_BANDS.forEach((band, index) => {
+        const filter = offlineContext.createBiquadFilter();
+        filter.type = 'peaking';
+        filter.frequency.value = band.freq;
+        filter.Q.value = 1;
+        filter.gain.value = eqValues[index] || 0;
 
-        for (let channel = 0; channel < numberOfChannels; channel++) {
-          const originalData = audioBuffer.getChannelData(channel);
-          const channelData = new Float32Array(originalData);
-          const reversedData = reversedBuffer.getChannelData(channel);
-
-          for (let i = 0; i < length; i++) {
-            reversedData[i] = channelData[length - 1 - i];
-          }
+        if (filters.length > 0) {
+          filters[filters.length - 1].connect(filter);
         }
+        filters.push(filter);
+      });
 
-        processedBuffer = reversedBuffer;
+      // GainNode
+      const gainNode = offlineContext.createGain();
+
+      // 연결: source -> voice effect -> filters -> gain -> destination
+      if (filters.length > 0) {
+        output.connect(filters[0]);
+        filters[filters.length - 1].connect(gainNode);
+        gainNode.connect(offlineContext.destination);
       } else {
-        // 다른 효과: 오프라인 렌더링
-        const output = applyVoiceEffect(offlineContext, source, selectedEffect);
-        output.connect(offlineContext.destination);
-
-        source.start(0);
-        processedBuffer = await offlineContext.startRendering();
+        output.connect(gainNode);
+        gainNode.connect(offlineContext.destination);
       }
+
+      source.start(0);
+      const processedBuffer = await offlineContext.startRendering();
 
       // WAV로 변환
       const wavBlob = audioBufferToWav(processedBuffer);
@@ -573,7 +1007,8 @@ export default function VoiceChanger() {
       const url = URL.createObjectURL(wavBlob);
       const a = document.createElement('a');
       a.href = url;
-      const originalName = audioFile.name.replace(/\.[^/.]+$/, '');
+      const originalName =
+        audioFile?.name.replace(/\.[^/.]+$/, '') || 'recorded';
       const effectName =
         VOICE_EFFECTS.find(e => e.id === selectedEffect)?.name || 'effect';
       a.download = `${originalName}_${effectName}.wav`;
@@ -641,9 +1076,30 @@ export default function VoiceChanger() {
     return new Blob([arrayBuffer], { type: 'audio/wav' });
   };
 
+  // Canvas 크기 조정
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const resizeCanvas = () => {
+        const container = canvas.parentElement;
+        if (container) {
+          canvas.width = container.clientWidth;
+          canvas.height = 200;
+        }
+      };
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      return () => window.removeEventListener('resize', resizeCanvas);
+    }
+  }, []);
+
   // 컴포넌트 언마운트 시 정리
   useEffect(() => {
     return () => {
+      // 웨이브 애니메이션 정리
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
       if (sourceRef.current) {
         sourceRef.current.stop();
       }
@@ -688,6 +1144,17 @@ export default function VoiceChanger() {
           {error && (
             <div className='mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg'>
               <p className='text-red-800 dark:text-red-200 text-sm'>{error}</p>
+            </div>
+          )}
+
+          {/* 웨이브 시각화 영역 */}
+          {(audioFile || audioBlob) && (
+            <div className='mb-8 rounded-lg overflow-hidden bg-slate-900'>
+              <canvas
+                ref={canvasRef}
+                className='w-full h-[200px] block'
+                style={{ background: 'rgba(15, 23, 42, 0.9)' }}
+              />
             </div>
           )}
 
@@ -794,6 +1261,8 @@ export default function VoiceChanger() {
                       setAudioUrl(null);
                       setCurrentTime(0);
                       setSelectedEffect('none');
+                      setEqValues(new Array(EQ_BANDS.length).fill(0));
+                      setSelectedPreset(null);
                       setIsPlaying(false);
                       setRecordingState('idle');
                       setRecordingTime(0);
@@ -838,6 +1307,80 @@ export default function VoiceChanger() {
                 </div>
               </div>
 
+              {/* 프리셋 선택 */}
+              <div className='mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg'>
+                <div className='flex items-center gap-2 mb-3'>
+                  <Settings className='w-5 h-5 text-gray-600 dark:text-gray-400' />
+                  <h3 className='font-semibold text-gray-900 dark:text-white'>
+                    이퀄라이저 프리셋
+                  </h3>
+                </div>
+                <div className='flex flex-wrap gap-2'>
+                  {Object.keys(PRESETS).map(key => (
+                    <Button
+                      key={key}
+                      variant={selectedPreset === key ? 'default' : 'outline'}
+                      size='sm'
+                      onClick={() => applyPreset(key as PresetKey)}
+                    >
+                      {PRESETS[key as PresetKey].name}
+                    </Button>
+                  ))}
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    onClick={resetEQ}
+                    className='flex items-center gap-1'
+                  >
+                    <RotateCcw className='w-4 h-4' />
+                    리셋
+                  </Button>
+                </div>
+              </div>
+
+              {/* 이퀄라이저 밴드 */}
+              <div className='mb-8 p-6 bg-gray-50 dark:bg-gray-700/50 rounded-lg'>
+                <h3 className='font-semibold text-gray-900 dark:text-white mb-6 text-center'>
+                  주파수 밴드 조절 (-12dB ~ +12dB)
+                </h3>
+                <div className='grid grid-cols-5 md:grid-cols-10 gap-4'>
+                  {EQ_BANDS.map((band, index) => (
+                    <div
+                      key={index}
+                      className='flex flex-col items-center gap-2'
+                    >
+                      <label className='text-xs font-medium text-gray-600 dark:text-gray-400 text-center'>
+                        {band.label}
+                      </label>
+                      <div className='relative w-full h-48 flex flex-col items-center'>
+                        <input
+                          type='range'
+                          min='-12'
+                          max='12'
+                          step='0.5'
+                          value={eqValues[index] || 0}
+                          onChange={e =>
+                            handleBandChange(index, Number(e.target.value))
+                          }
+                          className='w-8 h-full writing-vertical-rl appearance-none bg-transparent cursor-pointer slider-vertical'
+                          style={{
+                            writingMode: 'vertical-rl',
+                            transform: 'rotate(180deg)',
+                          }}
+                        />
+                        <div className='absolute bottom-0 text-xs font-medium text-gray-700 dark:text-gray-300 min-h-[20px]'>
+                          {eqValues[index] > 0
+                            ? `+${eqValues[index].toFixed(1)}`
+                            : eqValues[index] === 0
+                            ? '0'
+                            : eqValues[index].toFixed(1)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* 재생 컨트롤 */}
               <div className='mb-8'>
                 <div className='flex items-center justify-center gap-4 mb-6'>
@@ -846,7 +1389,7 @@ export default function VoiceChanger() {
                     variant='default'
                     size='lg'
                     className='flex items-center gap-2'
-                    disabled={!audioBuffer || selectedEffect === 'reverse'}
+                    disabled={!audioBuffer}
                   >
                     {isPlaying ? (
                       <>
@@ -938,6 +1481,18 @@ export default function VoiceChanger() {
                 <li className='flex items-start gap-2'>
                   <span className='text-green-500 mt-1'>✓</span>
                   <span>원본 품질 유지</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='text-green-500 mt-1'>✓</span>
+                  <span>10개 주파수 밴드 이퀄라이저 (60Hz ~ 16kHz)</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='text-green-500 mt-1'>✓</span>
+                  <span>8가지 이퀄라이저 프리셋 제공</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='text-green-500 mt-1'>✓</span>
+                  <span>음성 효과와 이퀄라이저 동시 적용 가능</span>
                 </li>
               </ul>
             </div>

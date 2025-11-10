@@ -32,6 +32,9 @@ export default function ChangePitch() {
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   // 시간 포맷팅 (MM:SS)
   const formatTime = (seconds: number): string => {
@@ -40,6 +43,162 @@ export default function ChangePitch() {
     return `${mins.toString().padStart(2, '0')}:${secs
       .toString()
       .padStart(2, '0')}`;
+  };
+
+  // 웨이브 그리기 함수 (개선된 시각 효과)
+  const drawWaveform = () => {
+    const canvas = canvasRef.current;
+    if (!canvas || !analyserRef.current) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const analyser = analyserRef.current;
+    const bufferLength = analyser.frequencyBinCount;
+    const timeDataArray = new Uint8Array(bufferLength);
+    const frequencyDataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    const draw = () => {
+      animationFrameRef.current = requestAnimationFrame(draw);
+
+      // 시간 도메인 데이터 (웨이브폼)
+      analyser.getByteTimeDomainData(timeDataArray);
+      // 주파수 도메인 데이터 (스펙트럼)
+      analyser.getByteFrequencyData(frequencyDataArray);
+
+      // 배경 그리기 (그라데이션 효과)
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, 'rgba(15, 23, 42, 0.95)');
+      gradient.addColorStop(0.5, 'rgba(30, 41, 59, 0.9)');
+      gradient.addColorStop(1, 'rgba(15, 23, 42, 0.95)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 기준선 그리기 (중앙)
+      ctx.strokeStyle = 'rgba(34, 211, 238, 0.3)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height / 2);
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.stroke();
+
+      // 주파수 스펙트럼 막대 그래프 (하단)
+      const barCount = 64; // 표시할 막대 개수
+      const barWidth = canvas.width / barCount;
+      const spectrumHeight = canvas.height * 0.3; // 스펙트럼 영역 높이
+
+      for (let i = 0; i < barCount; i++) {
+        const dataIndex = Math.floor(
+          (i / barCount) * frequencyDataArray.length
+        );
+        const barHeight =
+          (frequencyDataArray[dataIndex] / 255) * spectrumHeight;
+
+        // 그라데이션 색상 (주파수에 따라)
+        const hue = (i / barCount) * 180 + 180; // 청록색에서 파란색으로
+        const saturation = 70 + (frequencyDataArray[dataIndex] / 255) * 30;
+        const lightness = 50 + (frequencyDataArray[dataIndex] / 255) * 20;
+
+        ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        ctx.fillRect(
+          i * barWidth,
+          canvas.height - barHeight,
+          barWidth - 1,
+          barHeight
+        );
+
+        // 반사 효과 (상단에도 미러링)
+        ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, 0.3)`;
+        ctx.fillRect(i * barWidth, 0, barWidth - 1, barHeight * 0.5);
+      }
+
+      // 웨이브폼 그리기 (중앙 라인)
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+
+      const sliceWidth = canvas.width / bufferLength;
+      let x = 0;
+
+      // 그라데이션 스트로크
+      const waveGradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+      waveGradient.addColorStop(0, '#22d3ee');
+      waveGradient.addColorStop(0.5, '#06b6d4');
+      waveGradient.addColorStop(1, '#22d3ee');
+      ctx.strokeStyle = waveGradient;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const v = timeDataArray[i] / 128.0;
+        const y = canvas.height / 2 + (v * canvas.height) / 4;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+      }
+
+      ctx.stroke();
+
+      // 웨이브폼 채우기 (그라데이션)
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.lineTo(0, canvas.height / 2);
+      ctx.closePath();
+
+      const fillGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      fillGradient.addColorStop(0, 'rgba(34, 211, 238, 0.1)');
+      fillGradient.addColorStop(0.5, 'rgba(6, 182, 212, 0.2)');
+      fillGradient.addColorStop(1, 'rgba(34, 211, 238, 0.1)');
+      ctx.fillStyle = fillGradient;
+      ctx.fill();
+
+      // 상단 웨이브폼 (미러링)
+      ctx.beginPath();
+      x = 0;
+      for (let i = 0; i < bufferLength; i++) {
+        const v = timeDataArray[i] / 128.0;
+        const y = canvas.height / 2 - (v * canvas.height) / 4;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+      }
+
+      ctx.strokeStyle = 'rgba(34, 211, 238, 0.6)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    };
+
+    draw();
+  };
+
+  // 웨이브 애니메이션 중지
+  const stopWaveform = () => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        // 배경만 그리기
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // 기준선만 그리기
+        ctx.strokeStyle = 'rgba(34, 211, 238, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height / 2);
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.stroke();
+      }
+    }
   };
 
   // 파일 선택 핸들러
@@ -107,6 +266,13 @@ export default function ChangePitch() {
     if (isPlaying) {
       // 일시정지
       if (sourceRef.current) {
+        // 현재 재생 시간을 정확히 계산하여 저장
+        if (audioContextRef.current && startTimeRef.current !== null) {
+          const elapsed =
+            audioContextRef.current.currentTime - startTimeRef.current;
+          setCurrentTime(Math.min(elapsed, duration));
+        }
+
         sourceRef.current.stop();
         sourceRef.current = null;
       }
@@ -114,10 +280,19 @@ export default function ChangePitch() {
         clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
       }
+      // 웨이브 중지
+      stopWaveform();
       setIsPlaying(false);
     } else {
       // 재생
       const audioContext = audioContextRef.current;
+
+      // 재생 완료 후 재시작: currentTime이 duration과 같거나 거의 같으면 처음부터 재생
+      let startTime = currentTime;
+      if (Math.abs(currentTime - duration) < 0.1) {
+        startTime = 0;
+        setCurrentTime(0);
+      }
 
       // 기존 소스 정리
       if (sourceRef.current) {
@@ -132,11 +307,21 @@ export default function ChangePitch() {
 
       // GainNode로 볼륨 제어
       const gainNode = audioContext.createGain();
-      source.connect(gainNode);
-      gainNode.connect(audioContext.destination);
 
-      // 재생 시작
-      const offset = currentTime;
+      // AnalyserNode 생성 및 연결 (웨이브폼용)
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 2048;
+      analyserRef.current = analyser;
+
+      source.connect(gainNode);
+      gainNode.connect(analyser);
+      analyser.connect(audioContext.destination);
+
+      // 웨이브 그리기 시작
+      drawWaveform();
+
+      // 재생 시작 - 저장된 startTime부터 재생
+      const offset = Math.min(startTime, duration);
       startTimeRef.current = audioContext.currentTime - offset;
       source.start(0, offset);
 
@@ -148,6 +333,8 @@ export default function ChangePitch() {
           clearInterval(progressIntervalRef.current);
           progressIntervalRef.current = null;
         }
+        // 웨이브 중지
+        stopWaveform();
       };
 
       sourceRef.current = source;
@@ -192,6 +379,52 @@ export default function ChangePitch() {
     return `${sign}${semitones} semitones`;
   };
 
+  // 피치 변경을 위한 리샘플링 함수 (선형 보간)
+  const resampleForPitch = (
+    samples: Float32Array,
+    pitchRatio: number
+  ): Float32Array => {
+    if (pitchRatio === 1.0) {
+      return new Float32Array(samples);
+    }
+
+    const inputLength = samples.length;
+    // 원본 길이 유지 (템포 유지)
+    const outputLength = inputLength;
+    const result = new Float32Array(outputLength);
+
+    for (let i = 0; i < outputLength; i++) {
+      // 원본 샘플 인덱스 계산
+      // 피치를 높이면 (pitchRatio > 1): 원본을 더 빠르게 읽음
+      // 피치를 낮추면 (pitchRatio < 1): 원본을 더 느리게 읽음
+      const sourceIndex = i / pitchRatio;
+      const indexFloor = Math.floor(sourceIndex);
+      const indexCeil = Math.min(indexFloor + 1, inputLength - 1);
+      const fraction = sourceIndex - indexFloor;
+
+      // 선형 보간
+      if (indexFloor >= 0 && indexFloor < inputLength) {
+        if (indexCeil < inputLength && indexCeil > indexFloor) {
+          // 두 샘플 사이 선형 보간
+          result[i] =
+            samples[indexFloor] * (1 - fraction) +
+            samples[indexCeil] * fraction;
+        } else {
+          // 경계 처리: 마지막 샘플 사용
+          result[i] = samples[indexFloor];
+        }
+      } else if (indexFloor < 0) {
+        // 시작 부분: 첫 샘플 사용
+        result[i] = samples[0];
+      } else {
+        // 끝 부분: 마지막 샘플 사용
+        result[i] = samples[inputLength - 1];
+      }
+    }
+
+    return result;
+  };
+
   // 피치 변경 및 다운로드
   const handleChangePitch = async () => {
     if (!audioBuffer || !audioFile) return;
@@ -203,14 +436,16 @@ export default function ChangePitch() {
       const audioContext = new (window.AudioContext ||
         (window as any).webkitAudioContext)();
 
-      // 피치 변경을 위한 샘플레이트 조정
-      // 피치를 높이려면 샘플레이트를 높이고, 낮추려면 낮춤
-      // 하지만 길이는 유지해야 하므로 리샘플링 필요
-      const pitchRatio = Math.pow(2, pitch / 12); // semitones를 비율로 변환
+      // 피치 변경을 위한 비율 계산
+      // pitch > 0: 피치가 높아짐 (주파수가 높아짐)
+      // pitch < 0: 피치가 낮아짐 (주파수가 낮아짐)
+      const pitchRatio = Math.pow(2, pitch / 12); // semitones를 주파수 비율로 변환
       const originalSampleRate = audioBuffer.sampleRate;
       const numberOfChannels = audioBuffer.numberOfChannels;
       const originalLength = audioBuffer.length;
-      const newLength = originalLength; // 길이는 유지
+
+      // 템포는 유지하므로 재생 시간(길이)은 동일
+      const newLength = originalLength;
 
       // 새로운 AudioBuffer 생성 (원본 샘플레이트 유지)
       const newBuffer = audioContext.createBuffer(
@@ -219,24 +454,21 @@ export default function ChangePitch() {
         originalSampleRate
       );
 
-      // 피치 시프팅을 위한 리샘플링
+      // 피치 시프팅을 위한 리샘플링 (모든 채널 처리)
       for (let channel = 0; channel < numberOfChannels; channel++) {
         const originalData = audioBuffer.getChannelData(channel);
-        const channelData = new Float32Array(originalData);
+        const resampledData = resampleForPitch(originalData, pitchRatio);
         const newData = newBuffer.getChannelData(channel);
 
-        // 간단한 피치 시프팅: 샘플을 읽는 위치를 조정
-        for (let i = 0; i < newLength; i++) {
-          const sourceIndex = i / pitchRatio;
-          const indexFloor = Math.floor(sourceIndex);
-          const indexCeil = Math.min(indexFloor + 1, originalLength - 1);
-          const fraction = sourceIndex - indexFloor;
+        // 리샘플링된 데이터를 새 버퍼에 복사
+        const copyLength = Math.min(resampledData.length, newLength);
+        for (let i = 0; i < copyLength; i++) {
+          newData[i] = resampledData[i];
+        }
 
-          if (indexFloor >= 0 && indexCeil < originalLength) {
-            newData[i] =
-              channelData[indexFloor] * (1 - fraction) +
-              channelData[indexCeil] * fraction;
-          } else {
+        // 남은 공간이 있으면 0으로 채우기 (무음)
+        if (copyLength < newLength) {
+          for (let i = copyLength; i < newLength; i++) {
             newData[i] = 0;
           }
         }
@@ -317,9 +549,30 @@ export default function ChangePitch() {
     return new Blob([arrayBuffer], { type: 'audio/wav' });
   };
 
+  // Canvas 크기 조정
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const resizeCanvas = () => {
+        const container = canvas.parentElement;
+        if (container) {
+          canvas.width = container.clientWidth;
+          canvas.height = 200;
+        }
+      };
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      return () => window.removeEventListener('resize', resizeCanvas);
+    }
+  }, []);
+
   // 컴포넌트 언마운트 시 정리
   useEffect(() => {
     return () => {
+      // 웨이브 애니메이션 정리
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
       if (sourceRef.current) {
         sourceRef.current.stop();
       }
@@ -360,6 +613,17 @@ export default function ChangePitch() {
           {error && (
             <div className='mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg'>
               <p className='text-red-800 dark:text-red-200 text-sm'>{error}</p>
+            </div>
+          )}
+
+          {/* 웨이브 시각화 영역 */}
+          {audioFile && (
+            <div className='mb-8 rounded-lg overflow-hidden bg-slate-900'>
+              <canvas
+                ref={canvasRef}
+                className='w-full h-[200px] block'
+                style={{ background: 'rgba(15, 23, 42, 0.9)' }}
+              />
             </div>
           )}
 

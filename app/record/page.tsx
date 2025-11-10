@@ -11,7 +11,7 @@ type RecordingState = 'idle' | 'recording' | 'paused' | 'recorded';
 export default function Record() {
   // 상태 관리
   const [recordingState, setRecordingState] = useState<RecordingState>('idle');
-  const [recordingTime, setRecordingTime] = useState(0); // 녹음 시간 (초)
+  const [recordingTime, setRecordingTime] = useState(0); // 녹음 시간 (센티초, 1/100초)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null); // 녹음된 오디오
   const [audioUrl, setAudioUrl] = useState<string | null>(null); // 재생용 URL
   const [isPlaying, setIsPlaying] = useState(false); // 재생 중 여부
@@ -28,6 +28,7 @@ export default function Record() {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(null); // 녹음 시작 시간 (밀리초)
   const sourceRef = useRef<
     | MediaStreamAudioSourceNode
     | AudioBufferSourceNode
@@ -35,13 +36,15 @@ export default function Record() {
     | null
   >(null);
 
-  // 녹음 시간 포맷팅 (MM:SS)
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
+  // 녹음 시간 포맷팅 (MM:SS:CC - 분:초:센티초)
+  const formatTime = (centiseconds: number): string => {
+    const totalSeconds = Math.floor(centiseconds / 100);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    const centis = centiseconds % 100;
     return `${mins.toString().padStart(2, '0')}:${secs
       .toString()
-      .padStart(2, '0')}`;
+      .padStart(2, '0')}:${centis.toString().padStart(2, '0')}`;
   };
 
   // 웨이브 그리기 함수 (개선된 시각 효과)
@@ -87,8 +90,11 @@ export default function Record() {
       const spectrumHeight = canvas.height * 0.3; // 스펙트럼 영역 높이
 
       for (let i = 0; i < barCount; i++) {
-        const dataIndex = Math.floor((i / barCount) * frequencyDataArray.length);
-        const barHeight = (frequencyDataArray[dataIndex] / 255) * spectrumHeight;
+        const dataIndex = Math.floor(
+          (i / barCount) * frequencyDataArray.length
+        );
+        const barHeight =
+          (frequencyDataArray[dataIndex] / 255) * spectrumHeight;
 
         // 그라데이션 색상 (주파수에 따라)
         const hue = (i / barCount) * 180 + 180; // 청록색에서 파란색으로
@@ -428,7 +434,15 @@ export default function Record() {
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
         setRecordingState('recorded');
-        setRecordingTime(0);
+
+        // 최종 시간 계산
+        if (startTimeRef.current) {
+          const elapsed = Date.now() - startTimeRef.current;
+          const centiseconds = Math.floor(elapsed / 10);
+          setRecordingTime(centiseconds);
+        }
+
+        startTimeRef.current = null;
 
         // 웨이브 중지
         stopWaveform();
@@ -461,10 +475,17 @@ export default function Record() {
       mediaRecorder.start();
       setRecordingState('recording');
 
-      // 타이머 시작
+      // 녹음 시작 시간 저장
+      startTimeRef.current = Date.now();
+
+      // 타이머 시작 (10ms마다 업데이트하여 센티초 단위로 표시)
       timerRef.current = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
-      }, 1000);
+        if (startTimeRef.current) {
+          const elapsed = Date.now() - startTimeRef.current;
+          const centiseconds = Math.floor(elapsed / 10); // 밀리초를 센티초로 변환
+          setRecordingTime(centiseconds);
+        }
+      }, 10);
     } catch (err) {
       setError('녹음을 시작할 수 없습니다.');
       stream.getTracks().forEach(track => track.stop());
@@ -543,10 +564,7 @@ export default function Record() {
     stopWaveform();
 
     // AudioContext 정리
-    if (
-      audioContextRef.current &&
-      audioContextRef.current.state !== 'closed'
-    ) {
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
       audioContextRef.current.close().catch(err => {
         // 이미 닫혔거나 닫는 중인 경우 무시
         console.warn('AudioContext close error:', err);
@@ -565,6 +583,7 @@ export default function Record() {
     setRecordingTime(0);
     setIsPlaying(false);
     setError(null);
+    startTimeRef.current = null;
   };
 
   // 오디오 다운로드 (MP3로 변환)
