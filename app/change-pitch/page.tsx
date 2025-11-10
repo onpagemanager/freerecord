@@ -602,7 +602,7 @@ export default function ChangePitch() {
           {/* 제목 */}
           <div className='text-center mb-8'>
             <h1 className='text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2'>
-              피치 변경
+              음정 변경
             </h1>
             <p className='text-gray-600 dark:text-gray-400'>
               오디오 파일의 음높이를 변경하세요 (템포는 유지됩니다)

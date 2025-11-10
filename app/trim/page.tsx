@@ -29,7 +29,7 @@ export default function Trim() {
   const [fadeOut, setFadeOut] = useState(false); // Fade out 옵션
   const [isProcessing, setIsProcessing] = useState(false); // 처리 중 여부
   const [error, setError] = useState<string | null>(null);
-  
+
   // 단계별 완료 상태 추적
   const [stepCompleted, setStepCompleted] = useState({
     step1: false, // 파일 업로드
@@ -38,7 +38,7 @@ export default function Trim() {
     step4: false, // Fade 옵션 (선택사항이므로 항상 true로 간주)
     step5: false, // 트림 및 다운로드
   });
-  
+
   // 구간이 선택되었는지 확인 (전체 구간이 아닌 경우)
   const isRangeSelected = startTime > 0 || endTime < duration;
 
@@ -91,7 +91,7 @@ export default function Trim() {
   const handleFileSelect = async (file: File) => {
     setError(null);
     setAudioFile(file);
-    
+
     // 단계 상태 초기화
     setStepCompleted({
       step1: false,
@@ -322,7 +322,7 @@ export default function Trim() {
       }
 
       const audio = audioRef.current;
-      
+
       // 재생 버튼을 누를 때마다 항상 시작점에서 재생
       const playTime = startTime;
       setCurrentTime(startTime);
@@ -348,7 +348,7 @@ export default function Trim() {
       }, 100);
 
       setIsPlaying(true);
-      
+
       // 3단계: 재생 확인 완료
       setStepCompleted(prev => ({ ...prev, step3: true }));
     }
@@ -418,7 +418,7 @@ export default function Trim() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       // 5단계: 트림 및 다운로드 완료
       setStepCompleted(prev => ({ ...prev, step5: true }));
     } catch (err) {
@@ -533,7 +533,7 @@ export default function Trim() {
           {/* 제목 */}
           <div className='text-center mb-8'>
             <h1 className='text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2'>
-              오디오 트림
+              오디오 다듬기
             </h1>
             <p className='text-gray-600 dark:text-gray-400'>
               오디오 파일을 업로드하고 원하는 구간을 잘라내세요
@@ -713,7 +713,7 @@ export default function Trim() {
                       setEndTime(0);
                       setCurrentTime(0);
                       setIsPlaying(false);
-                      
+
                       // 단계 상태 초기화
                       setStepCompleted({
                         step1: false,
@@ -722,7 +722,7 @@ export default function Trim() {
                         step4: false,
                         step5: false,
                       });
-                      
+
                       if (audioRef.current) {
                         audioRef.current.pause();
                         audioRef.current = null;

@@ -52,19 +52,19 @@ export default function Header() {
             <Image
               src='/logo.png'
               alt='freerecorder'
-              width={200}
+              width={180}
               height={80}
               className='dark:invert'
             />
           </Link>
 
           {/* 메뉴 - 정확히 중앙에 배치 */}
-          <nav className='hidden lg:flex items-center justify-center absolute left-1/2 -translate-x-1/2 space-x-8'>
+          <nav className='hidden lg:flex items-center justify-center absolute left-1/2 -translate-x-1/2 space-x-6'>
             {menuItems.map(item => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`hover:text-gray-900 dark:hover:text-white font-medium transition-colors duration-200 relative group ${
+                className={`hover:text-gray-900 dark:hover:text-white font-medium transition-colors duration-200 relative group text-sm ${
                   isScrolled
                     ? 'text-gray-600 dark:text-gray-400'
                     : 'text-gray-700 dark:text-gray-300'

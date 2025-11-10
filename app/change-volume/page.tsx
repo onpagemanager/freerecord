@@ -292,14 +292,14 @@ export default function ChangeVolume() {
       }
 
       const audio = audioRef.current;
-      
+
       // 재생 완료 후 재시작: currentTime이 duration과 같거나 거의 같으면 처음부터 재생
       let playTime = currentTime;
       if (Math.abs(currentTime - duration) < 0.1) {
         playTime = 0;
         setCurrentTime(0);
       }
-      
+
       // 저장된 playTime부터 재생
       audio.currentTime = playTime;
       // HTMLAudioElement의 volume은 0-1 범위만 허용 (재생 미리보기용)
@@ -532,7 +532,7 @@ export default function ChangeVolume() {
           {/* 제목 */}
           <div className='text-center mb-8'>
             <h1 className='text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2'>
-              볼륨 변경
+              음량 변경
             </h1>
             <p className='text-gray-600 dark:text-gray-400'>
               오디오 파일의 볼륨을 증가하거나 감소시키세요
