@@ -9,33 +9,33 @@ import {
   Eye,
   Share2,
   BookOpen,
-  Mic,
-  Sparkles,
-  Settings,
+  Sliders,
+  Radio,
   Music,
-  Video,
+  Mic,
+  Zap,
 } from 'lucide-react';
 
 export default function BlogDetail() {
   // 게시글 메타 정보
   const postMeta = {
     id: 6,
-    title: '음성 변조로 만드는 독특한 효과들',
+    title: '이퀄라이저로 음질 개선하기',
     author: '오디오마스터',
-    date: '2024-01-20',
-    views: 2150,
-    likes: 156,
-    comments: 42,
+    date: '2024-01-25',
+    views: 2890,
+    likes: 203,
+    comments: 58,
     category: '튜토리얼',
     tags: [
-      '음성변조',
-      '보이스이펙트',
+      '이퀄라이저',
+      'EQ',
       '오디오편집',
-      '콘텐츠제작',
-      '음성효과',
+      '음질개선',
+      '믹싱',
+      '마스터링',
       'DAW',
-      '팟캐스트',
-      '유튜브',
+      '오디오기초',
     ],
   };
 
@@ -124,833 +124,954 @@ export default function BlogDetail() {
           {/* 소개 문단 */}
           <div className='mb-8'>
             <p className='text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-4'>
-              콘텐츠 제작의 세계에서 음성은 단순히 정보를 전달하는 수단을 넘어,
-              창의성과 개성을 표현하는 강력한 도구입니다. 특히 음성 변조 기술은
-              평범한 목소리를 로봇, 외계인, 괴물, 또는 완전히 다른 인물의
-              목소리로 바꿔주어 콘텐츠에 독특한 매력을 더해줍니다.
+              오디오 편집에서 가장 강력하면서도 섬세한 도구 중 하나가 바로
+              이퀄라이저(Equalizer, EQ)입니다. 이퀄라이저는 특정 주파수 대역의
+              음량을 조절하여 음질을 개선하고, 원하는 사운드를 만들어내는 필수
+              도구입니다.
             </p>
             <p className='text-lg text-gray-700 dark:text-gray-300 leading-relaxed'>
-              오늘은 다양한 음성 변조 효과를 활용하여 독특한 오디오 콘텐츠를
-              만드는 방법을 상세히 소개해드리겠습니다.
+              겉보기에는 복잡해 보이지만, 기본 원리를 이해하면 누구나 전문가처럼
+              음질을 향상시킬 수 있습니다. 오늘은 이퀄라이저를 활용하여 음질을
+              개선하고 원하는 사운드를 만드는 방법을 상세히 설명해드리겠습니다.
             </p>
           </div>
 
-          {/* 음성 변조가 필요한 이유 */}
+          {/* 이퀄라이저란 무엇인가 */}
           <section className='mb-10'>
             <h2 className='text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2'>
-              <Mic className='w-6 h-6 text-purple-600 dark:text-purple-400' />
-              음성 변조가 필요한 이유
+              <Sliders className='w-6 h-6 text-purple-600 dark:text-purple-400' />
+              이퀄라이저란 무엇인가?
             </h2>
             <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-4'>
-              음성 변조는 단순한 재미를 넘어 실용적인 목적으로도 광범위하게
-              활용됩니다.
-            </p>
-
-            <ul className='space-y-3 mb-6'>
-              <li className='flex items-start gap-3'>
-                <span className='text-purple-600 dark:text-purple-400 font-bold mt-1'>
-                  •
-                </span>
-                <div>
-                  <strong className='text-gray-900 dark:text-white'>
-                    프라이버시 보호:
-                  </strong>
-                  <span className='text-gray-700 dark:text-gray-300'>
-                    {' '}
-                    인터뷰나 증언 영상에서 신원을 보호해야 할 때, 음성 변조는
-                    필수적입니다. 목소리만으로도 개인을 식별할 수 있기 때문에,
-                    민감한 내용을 다룰 때는 반드시 음성 변조를 고려해야 합니다.
-                  </span>
-                </div>
-              </li>
-              <li className='flex items-start gap-3'>
-                <span className='text-purple-600 dark:text-purple-400 font-bold mt-1'>
-                  •
-                </span>
-                <div>
-                  <strong className='text-gray-900 dark:text-white'>
-                    캐릭터 연출:
-                  </strong>
-                  <span className='text-gray-700 dark:text-gray-300'>
-                    {' '}
-                    애니메이션, 게임, 오디오 드라마 제작 시 다양한 캐릭터를
-                    표현할 수 있습니다. 한 명의 성우가 여러 역할을 소화할 때나,
-                    비현실적인 캐릭터를 표현할 때 특히 유용합니다.
-                  </span>
-                </div>
-              </li>
-              <li className='flex items-start gap-3'>
-                <span className='text-purple-600 dark:text-purple-400 font-bold mt-1'>
-                  •
-                </span>
-                <div>
-                  <strong className='text-gray-900 dark:text-white'>
-                    창의적 표현:
-                  </strong>
-                  <span className='text-gray-700 dark:text-gray-300'>
-                    {' '}
-                    ASMR, 실험적 음악, 사운드 아트 등에서 독특한 청각적 경험을
-                    만들어냅니다. 평범한 소리도 변조를 거치면 완전히 새로운 예술
-                    작품이 될 수 있습니다.
-                  </span>
-                </div>
-              </li>
-              <li className='flex items-start gap-3'>
-                <span className='text-purple-600 dark:text-purple-400 font-bold mt-1'>
-                  •
-                </span>
-                <div>
-                  <strong className='text-gray-900 dark:text-white'>
-                    브랜딩:
-                  </strong>
-                  <span className='text-gray-700 dark:text-gray-300'>
-                    {' '}
-                    유튜브나 팟캐스트에서 특정한 음성 효과를 시그니처로 사용하면
-                    강력한 브랜드 아이덴티티를 구축할 수 있습니다. 듣는 순간
-                    누구의 콘텐츠인지 알 수 있게 만드는 것이죠.
-                  </span>
-                </div>
-              </li>
-              <li className='flex items-start gap-3'>
-                <span className='text-purple-600 dark:text-purple-400 font-bold mt-1'>
-                  •
-                </span>
-                <div>
-                  <strong className='text-gray-900 dark:text-white'>
-                    엔터테인먼트:
-                  </strong>
-                  <span className='text-gray-700 dark:text-gray-300'>
-                    {' '}
-                    코미디 콘텐츠, 패러디, 밈 제작에서 웃음을 유발하는 효과적인
-                    도구입니다. 음성 변조만으로도 평범한 대사가 웃긴 대사로 바뀔
-                    수 있습니다.
-                  </span>
-                </div>
-              </li>
-            </ul>
-          </section>
-
-          {/* 음성 변조의 기본 원리 */}
-          <section className='mb-10'>
-            <h2 className='text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2'>
-              <Settings className='w-6 h-6 text-blue-600 dark:text-blue-400' />
-              음성 변조의 기본 원리
-            </h2>
-            <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-4'>
-              음성 변조를 효과적으로 사용하려면 기본 원리를 이해하는 것이 도움이
-              됩니다.
+              이퀄라이저는 오디오 신호의 주파수 스펙트럼을 조절하는 도구입니다.
+              쉽게 말해 소리의 저음, 중음, 고음을 각각 조절할 수 있는 장치라고
+              생각하면 됩니다.
             </p>
 
             <div className='space-y-4'>
               <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
                 <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  피치(Pitch) 조절
+                  주파수의 이해
                 </h3>
                 <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  음의 높낮이를 조절합니다. 피치를 높이면 어린아이나 만화 캐릭터
-                  같은 목소리가 되고, 낮추면 굵고 위엄 있는 목소리가 됩니다.
-                  반음(semitone) 단위로 조절하는데, ±12 semitone이 한
-                  옥타브입니다.
+                  사람이 들을 수 있는 소리는 대략 20Hz에서 20,000Hz(20kHz)
+                  사이입니다. 낮은 주파수는 저음(베이스, 킥드럼), 중간 주파수는
+                  중음(보컬, 기타), 높은 주파수는 고음(심벌, 하이햇)에
+                  해당합니다.
                 </p>
               </div>
 
               <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
                 <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  포먼트(Formant) 변경
+                  왜 필요한가
                 </h3>
                 <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  목소리의 음색을 결정하는 요소입니다. 피치와 독립적으로 조절할
-                  수 있어, 피치는 그대로 두고 목소리의 성별이나 나이만 바꿀 수
-                  있습니다. 포먼트를 올리면 여성스러운 목소리, 내리면 남성스러운
-                  목소리가 됩니다.
+                  녹음 환경, 마이크 특성, 공간의 음향 특성 등으로 인해 특정
+                  주파수가 과도하거나 부족할 수 있습니다. 이퀄라이저로 이러한
+                  불균형을 바로잡아 더 깨끗하고 명료한 소리를 만들 수 있습니다.
                 </p>
               </div>
 
               <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
                 <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  속도(Tempo) 조정
+                  보정 vs 창의적 사용
                 </h3>
                 <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  말하는 속도를 바꿉니다. 피치를 유지하면서 속도만 바꾸거나, 둘
-                  다 함께 바꿀 수 있습니다. 느린 속도는 괴물이나 거인, 빠른
-                  속도는 다람쥐나 요정 같은 캐릭터를 표현할 때 좋습니다.
-                </p>
-              </div>
-
-              <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  공간 효과(Reverb, Echo)
-                </h3>
-                <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  목소리가 울리는 공간의 특성을 부여합니다. 큰 홀, 동굴, 우주선
-                  내부 등 다양한 환경을 음향적으로 재현할 수 있습니다.
-                </p>
-              </div>
-
-              <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  왜곡(Distortion)
-                </h3>
-                <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  신호를 의도적으로 찌그러뜨려 거칠고 공격적인 느낌을 만듭니다.
-                  로봇, 괴물, 전화 목소리 등을 표현할 때 사용합니다.
+                  이퀄라이저는 문제를 수정하는 보정 도구이자, 독특한 음색을
+                  만드는 창의적 도구이기도 합니다. 때로는 결함을 제거하고,
+                  때로는 특정 분위기를 연출합니다.
                 </p>
               </div>
             </div>
           </section>
 
-          {/* 대표적인 음성 변조 효과들 */}
+          {/* 주파수 대역별 특성 이해하기 */}
           <section className='mb-10'>
             <h2 className='text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2'>
-              <Sparkles className='w-6 h-6 text-yellow-600 dark:text-yellow-400' />
-              대표적인 음성 변조 효과들
+              <Radio className='w-6 h-6 text-blue-600 dark:text-blue-400' />
+              주파수 대역별 특성 이해하기
             </h2>
+            <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-4'>
+              효과적인 이퀄라이징을 위해서는 각 주파수 대역이 어떤 소리를
+              담당하는지 알아야 합니다.
+            </p>
 
-            {/* 1. 로봇 음성 */}
-            <div className='mb-8'>
+            {/* 초저음 */}
+            <div className='mb-6'>
               <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
-                1. 로봇 음성 (Robot Voice)
+                초저음 (20-60Hz)
               </h3>
-              <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-3'>
-                로봇 음성은 SF 콘텐츠나 AI 캐릭터를 표현할 때 가장 많이 사용되는
-                효과입니다.
-              </p>
-              <div className='p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 mb-3'>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  만드는 방법:
-                </h4>
+              <div className='p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'>
                 <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
-                  보코더(Vocoder)나 링 모듈레이터(Ring Modulator)를 사용합니다.
-                  약간의 디지털 왜곡과 메탈릭한 공명을 추가하면 더욱 기계적인
-                  느낌이 납니다. 피치를 약간 낮추고(-3 semitone), 억양을
-                  평탄하게 만들면 감정 없는 로봇의 느낌을 줄 수 있습니다.
-                </p>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2 mt-3'>
-                  활용 예시:
-                </h4>
-                <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  AI 어시스턴트 캐릭터, 사이버펑크 배경의 안드로이드, 시스템
-                  안내 음성, 미래형 내비게이션 등에 적합합니다.
-                </p>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2 mt-3'>
-                  세부 조정:
-                </h4>
-                <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  EQ로 중저음(200-500Hz)을 제거하고 중고음(2-4kHz)을 강조하면 더
-                  기계적인 소리가 납니다. 비트 크러셔(Bit Crusher)를 살짝 걸면
-                  디지털 노이즈가 추가되어 더욱 사실적입니다.
-                </p>
-              </div>
-            </div>
-
-            {/* 2. 헬륨 음성 */}
-            <div className='mb-8'>
-              <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
-                2. 헬륨 음성 (Chipmunk Voice)
-              </h3>
-              <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-3'>
-                헬륨을 마신 것처럼 높고 빠른 목소리입니다.
-              </p>
-              <div className='p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 mb-3'>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  만드는 방법:
-                </h4>
-                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
-                  피치를 5-8 semitone 올리고 속도를 약 120-150%로 증가시킵니다.
-                  포먼트도 함께 올리면 더 자연스럽습니다.
-                </p>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2 mt-3'>
-                  활용 예시:
-                </h4>
-                <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  코미디 콘텐츠, 어린이용 캐릭터, 다람쥐나 작은 동물 캐릭터,
-                  패러디 영상에 좋습니다. 진지한 장면을 우스꽝스럽게 만들 때도
-                  효과적입니다.
-                </p>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2 mt-3'>
-                  주의사항:
-                </h4>
-                <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  너무 많이 올리면 알아듣기 어려워지므로, 명료도를 유지하는
-                  선에서 조절해야 합니다.
-                </p>
-              </div>
-            </div>
-
-            {/* 3. 악마/괴물 음성 */}
-            <div className='mb-8'>
-              <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
-                3. 악마/괴물 음성 (Demon Voice)
-              </h3>
-              <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-3'>
-                무섭고 위협적인 느낌을 주는 효과입니다.
-              </p>
-              <div className='p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 mb-3'>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  만드는 방법:
-                </h4>
-                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
-                  원본 음성의 피치를 -8에서 -12 semitone 낮춥니다. 여기에 약간
-                  지연된(-10ms ~ -50ms) 같은 음성을 레이어링하고, 디스토션과
-                  깊은 리버브를 추가합니다. 저음역대(80-200Hz)를 강조하면 더욱
-                  위협적입니다.
-                </p>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2 mt-3'>
-                  활용 예시:
-                </h4>
-                <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  호러 게임, 공포 영화 더빙, 할로윈 콘텐츠, 다크 판타지 캐릭터
-                  보이스에 적합합니다.
-                </p>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2 mt-3'>
-                  레이어링 기법:
-                </h4>
-                <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  같은 대사를 여러 번 녹음하여 살짝 다른 피치로 겹치면 여러
-                  목소리가 동시에 말하는 듯한 불길한 효과를 만들 수 있습니다.
-                </p>
-              </div>
-            </div>
-
-            {/* 4. 전화/무전기 음성 */}
-            <div className='mb-8'>
-              <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
-                4. 전화/무전기 음성 (Radio/Phone Voice)
-              </h3>
-              <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-3'>
-                오래된 통신 기기를 통해 들리는 듯한 효과입니다.
-              </p>
-              <div className='p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 mb-3'>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  만드는 방법:
-                </h4>
-                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
-                  EQ로 저음역대(100Hz 이하)와 고음역대(3kHz 이상)를 대폭
-                  줄입니다. 중간 대역(800Hz-2.5kHz)만 남기면 됩니다. 약간의
-                  노이즈와 압축을 추가하고, 비트 레이트를 낮추면 더욱
-                  사실적입니다.
-                </p>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2 mt-3'>
-                  활용 예시:
-                </h4>
-                <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  전화 통화 장면, 경찰 무전, 군대 통신, 레트로 라디오 방송 재현,
-                  스파이 영화 등에 사용됩니다.
-                </p>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2 mt-3'>
-                  시대별 변형:
-                </h4>
-                <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  1950년대 라디오는 더 좁은 주파수 대역(1-2kHz)을, 현대
-                  스마트폰은 좀 더 넓은 대역을 사용하면 차이를 표현할 수
+                  <strong>특성:</strong> 사람이 소리로 듣기보다는 몸으로 느끼는
+                  영역입니다. 킥드럼의 펀치감, 베이스의 무게감이 이 영역에
                   있습니다.
                 </p>
-              </div>
-            </div>
-
-            {/* 5. 수중 음성 */}
-            <div className='mb-8'>
-              <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
-                5. 수중 음성 (Underwater Voice)
-              </h3>
-              <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-3'>
-                물속에서 말하는 듯한 몽환적인 효과입니다.
-              </p>
-              <div className='p-4 rounded-lg bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800 mb-3'>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  만드는 방법:
-                </h4>
                 <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
-                  로우패스 필터로 2kHz 이상의 고음을 제거합니다. 약간의
-                  코러스(Chorus)와 플랜저(Flanger) 효과를 추가하고, 느린 LFO(Low
-                  Frequency Oscillator)로 모듈레이션을 걸면 물결치는 느낌이
-                  납니다.
+                  <strong>주의사항:</strong> 이 영역이 과도하면 소리가 혼탁하고
+                  무겁습니다. 특히 음성 녹음에서는 불필요한 초저음이 많으므로
+                  하이패스 필터로 제거하는 것이 좋습니다.
                 </p>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2 mt-3'>
-                  활용 예시:
-                </h4>
                 <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  수중 장면, 꿈 시퀀스, 회상 장면, 의식을 잃어가는 장면,
-                  초현실적 분위기 연출에 좋습니다.
+                  <strong>조절 팁:</strong> 음성 콘텐츠는 80Hz 이하를 과감히
+                  제거하세요. 음악에서도 킥드럼과 베이스가 아니라면 대부분
+                  제거하는 것이 깨끗합니다.
                 </p>
               </div>
             </div>
 
-            {/* 6. 외계인 음성 */}
-            <div className='mb-8'>
+            {/* 저음 */}
+            <div className='mb-6'>
               <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
-                6. 외계인 음성 (Alien Voice)
+                저음 (60-250Hz)
               </h3>
-              <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-3'>
-                비현실적이고 낯선 느낌의 목소리입니다.
-              </p>
-              <div className='p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 mb-3'>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  만드는 방법:
-                </h4>
+              <div className='p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'>
                 <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
-                  피치 시프터로 불규칙한 변조를 주거나, 링 모듈레이터로 금속성
-                  배음을 추가합니다. 리버스 리버브(거꾸로 재생한 리버브)를 살짝
-                  섞으면 더욱 초자연적인 느낌이 납니다.
+                  <strong>특성:</strong> 소리의 따뜻함과 두께를 결정합니다. 남성
+                  보컬의 가슴 울림, 어쿠스틱 기타의 바디감이 여기에 있습니다.
                 </p>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2 mt-3'>
-                  활용 예시:
-                </h4>
-                <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  SF 영화나 게임의 외계 종족, 초자연적 존재, 차원이 다른 생명체
-                  등을 표현할 때 사용합니다.
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>과다 증상:</strong> 부밍(booming) 현상이 발생하여
+                  소리가 울리고 뭉개집니다. 특히 작은 방에서 녹음하면 이 대역이
+                  과도하게 강조됩니다.
                 </p>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2 mt-3'>
-                  창의적 접근:
-                </h4>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>부족 증상:</strong> 소리가 얇고 가볍게 들립니다.
+                  존재감과 무게감이 없습니다.
+                </p>
                 <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  여러 효과를 무작위로 조합하거나, 예상치 못한 파라미터 값을
-                  사용하면 정말 독특한 외계인 목소리를 만들 수 있습니다.
+                  <strong>조절 가이드:</strong> 100-200Hz 대역은 조심스럽게
+                  다뤄야 합니다. 필요하면 2-3dB 정도만 조절하세요. 과도하면
+                  혼탁해지고, 너무 줄이면 빈약해집니다.
                 </p>
               </div>
             </div>
 
-            {/* 7. 노인 음성 */}
-            <div className='mb-8'>
+            {/* 중저음 */}
+            <div className='mb-6'>
               <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
-                7. 노인 음성 (Old Age Voice)
+                중저음 (250-500Hz)
               </h3>
-              <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-3'>
-                나이 든 사람의 목소리를 재현합니다.
-              </p>
-              <div className='p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 mb-3'>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  만드는 방법:
-                </h4>
+              <div className='p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800'>
                 <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
-                  피치를 약간 낮추고(-2 ~ -4 semitone), 포먼트도 함께 낮춥니다.
-                  약간의 떨림(Tremolo, 4-6Hz)을 추가하고, 고음역의 명료도를 살짝
-                  줄이면 됩니다. 숨소리나 입안의 소리를 강조하면 더
-                  사실적입니다.
+                  <strong>특성:</strong> 대부분의 악기와 목소리가 기본 음높이를
+                  가지는 영역입니다. 소리의 본체를 형성합니다.
                 </p>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2 mt-3'>
-                  활용 예시:
-                </h4>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>과다 증상:</strong> 소리가 박스 안에 갇힌 것처럼
+                  답답하고 콧소리처럼 들립니다. '머디(muddy)'하다고 표현합니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>부족 증상:</strong> 소리가 공허하고 힘이 없습니다.
+                </p>
                 <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  노인 캐릭터 연기, 시간 경과 표현, 과거 회상 내레이션 등에
-                  활용됩니다.
+                  <strong>조절 가이드:</strong> 300Hz 근처는 '머디함'의
+                  주범이므로, 음성이 답답하게 들린다면 이 영역을 2-4dB
+                  줄여보세요.
                 </p>
               </div>
             </div>
 
-            {/* 8. 동굴/큰 공간 음성 */}
-            <div className='mb-8'>
+            {/* 중음 */}
+            <div className='mb-6'>
               <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
-                8. 동굴/큰 공간 음성 (Cavern Echo)
+                중음 (500Hz-2kHz)
               </h3>
-              <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-3'>
-                넓고 울리는 공간에서 말하는 듯한 효과입니다.
-              </p>
-              <div className='p-4 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 mb-3'>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  만드는 방법:
-                </h4>
+              <div className='p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800'>
                 <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
-                  긴 리버브(3-5초)와 프리딜레이(100-200ms)를 추가합니다. 여러 번
-                  반복되는 에코를 설정하되, 각 반복마다 볼륨이 점진적으로
-                  줄어들게 합니다.
+                  <strong>특성:</strong> 음악적 내용의 핵심이 있는 영역입니다.
+                  대부분의 악기와 보컬이 이 범위에서 가장 많은 에너지를
+                  가집니다.
                 </p>
-                <h4 className='font-semibold text-gray-900 dark:text-white mb-2 mt-3'>
-                  활용 예시:
-                </h4>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>과다 증상:</strong> 귀에 거슬리고 피로합니다. 전화기
+                  목소리처럼 얇고 날카로워집니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>부족 증상:</strong> 소리가 먼 곳에서 들리는 것처럼
+                  거리감이 생깁니다.
+                </p>
                 <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  동굴, 대성당, 거대한 홀, 고대 유적, 산속 협곡 등의 장면에
-                  적합합니다.
+                  <strong>조절 가이드:</strong> 1-2kHz는 음성의 존재감을
+                  좌우합니다. 명료도를 높이려면 이 대역을 2-3dB 올리되, 너무
+                  과하면 거슬리므로 주의하세요.
+                </p>
+              </div>
+            </div>
+
+            {/* 중고음 */}
+            <div className='mb-6'>
+              <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
+                중고음 (2-6kHz)
+              </h3>
+              <div className='p-4 rounded-lg bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800'>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>특성:</strong> 명료도와 선명함을 결정하는 중요한
+                  영역입니다. 자음(ㅅ, ㅆ, ㅈ, ㅊ 등)이 이 대역에 있습니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>과다 증상:</strong> 치찰음이 심하고 날카롭게 들립니다.
+                  장시간 들으면 귀가 아픕니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>부족 증상:</strong> 소리가 멀고 흐릿하며, 무슨 말인지
+                  알아듣기 어렵습니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                  <strong>조절 가이드:</strong> 3-4kHz를 2-3dB 올리면 보컬이
+                  앞으로 나오고 명료해집니다. 하지만 5-6kHz가 과도하면 치찰음이
+                  거슬리므로 주의하세요.
+                </p>
+              </div>
+            </div>
+
+            {/* 고음 */}
+            <div className='mb-6'>
+              <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
+                고음 (6-20kHz)
+              </h3>
+              <div className='p-4 rounded-lg bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800'>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>특성:</strong> 공기감, 광택, 밝기를 더합니다. 심벌,
+                  하이햇, 숨소리 등이 이 영역에 있습니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>과다 증상:</strong> 쉿쉿거리는 소리가 시끄럽고,
+                  치찰음이 과도합니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>부족 증상:</strong> 소리가 어둡고 답답하며, 생동감이
+                  없습니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                  <strong>조절 가이드:</strong> 10kHz 이상을 2-3dB 올리면
+                  '공기감'이 생겨 더 비싸고 전문적으로 들립니다. 하지만 과하면
+                  노이즈도 함께 강조되므로 조심하세요.
                 </p>
               </div>
             </div>
           </section>
 
-          {/* 음성 변조를 위한 최고의 도구들 */}
+          {/* 이퀄라이저의 종류 */}
           <section className='mb-10'>
             <h2 className='text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2'>
-              <Music className='w-6 h-6 text-green-600 dark:text-green-400' />
-              음성 변조를 위한 최고의 도구들
+              <Sliders className='w-6 h-6 text-indigo-600 dark:text-indigo-400' />
+              이퀄라이저의 종류
             </h2>
+            <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-4'>
+              다양한 타입의 이퀄라이저가 있으며, 각각 다른 용도로 사용됩니다.
+            </p>
 
-            {/* 무료 소프트웨어 */}
-            <div className='mb-6'>
-              <h3 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
-                무료 소프트웨어
-              </h3>
-              <div className='space-y-4'>
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    Audacity
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    완전 무료 오픈소스 오디오 편집 프로그램입니다. 피치 변경,
-                    속도 조절, 이퀄라이저, 리버브, 에코 등 기본적인 음성 변조에
-                    필요한 모든 기능을 제공합니다. 초보자도 쉽게 배울 수 있고,
-                    플러그인을 추가하면 더 많은 효과를 사용할 수 있습니다.
-                  </p>
-                </div>
-
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    Voicemod Free
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    실시간 음성 변조 소프트웨어로, 게이머와 스트리머에게 인기가
-                    많습니다. 다양한 프리셋 효과를 제공하며, Discord, Zoom, OBS
-                    등과 호환됩니다. 무료 버전도 충분히 유용합니다.
-                  </p>
-                </div>
-
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    MorphVOX Junior
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    간단한 인터페이스로 실시간 음성 변조가 가능합니다. 로봇,
-                    괴물, 어린이, 여성/남성 등 기본 프리셋을 제공합니다.
-                  </p>
-                </div>
+            <div className='space-y-4'>
+              <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                  그래픽 이퀄라이저 (Graphic EQ)
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>특징:</strong> 여러 개의 슬라이더가 나란히 있어
+                  시각적으로 직관적입니다. 각 슬라이더는 특정 주파수 대역을
+                  담당합니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>장점:</strong> 전체적인 톤을 빠르게 조절할 수
+                  있습니다. 라이브 사운드에서 자주 사용됩니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>단점:</strong> 정확한 주파수를 세밀하게 조절하기
+                  어렵습니다. 고정된 대역만 조절 가능합니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                  <strong>활용:</strong> 전체 믹스의 톤을 조정하거나, 룸 음향을
+                  보정할 때 적합합니다.
+                </p>
               </div>
-            </div>
 
-            {/* 유료 전문 소프트웨어 */}
-            <div className='mb-6'>
-              <h3 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
-                유료 전문 소프트웨어
-              </h3>
-              <div className='space-y-4'>
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    Adobe Audition
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    전문가용 오디오 편집 프로그램으로, 매우 정교한 음성 변조가
-                    가능합니다. 스펙트럴 편집, 고급 노이즈 제거, 다양한 이펙트
-                    프로세서를 제공합니다. Creative Cloud 구독으로 사용할 수
-                    있습니다.
-                  </p>
-                </div>
-
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    iZotope RX
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    음성 복원과 변조에 특화된 전문가용 도구입니다. AI 기반
-                    기능으로 매우 자연스러운 음성 변조가 가능하며, 영화
-                    산업에서도 널리 사용됩니다.
-                  </p>
-                </div>
-
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    Celemony Melodyne
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    피치와 타이밍을 정밀하게 조절할 수 있는 프로그램입니다. 노래
-                    목소리 편집에 주로 사용되지만, 음성 변조에도 탁월합니다.
-                  </p>
-                </div>
-
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    Waves Plugins
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    다양한 보컬 이펙트 플러그인을 제공합니다. Vocal Rider, Vocal
-                    Bender, OVox 등은 창의적인 음성 변조에 매우 유용합니다.
-                  </p>
-                </div>
+              <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                  파라메트릭 이퀄라이저 (Parametric EQ)
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>특징:</strong> 주파수, 게인(음량), Q(대역폭)를 모두
+                  자유롭게 조절할 수 있습니다. 가장 유연하고 정교한 타입입니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>장점:</strong> 문제가 되는 정확한 주파수를 찾아서
+                  수술적으로 제거하거나 강조할 수 있습니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>단점:</strong> 초보자에게는 복잡하고 어렵게 느껴질 수
+                  있습니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                  <strong>활용:</strong> 전문적인 믹싱과 마스터링에 필수입니다.
+                  대부분의 DAW에 기본 내장되어 있습니다.
+                </p>
               </div>
-            </div>
 
-            {/* 모바일 앱 */}
-            <div className='mb-6'>
-              <h3 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
-                모바일 앱
-              </h3>
-              <div className='space-y-4'>
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    Voice Changer Plus (iOS)
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    40가지 이상의 음성 효과를 제공하며, 녹음과 동시에 효과를
-                    적용할 수 있습니다. 간편한 공유 기능도 제공합니다.
-                  </p>
-                </div>
+              <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                  셸프 이퀄라이저 (Shelving EQ)
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>특징:</strong> 특정 주파수 이상(하이 셸프) 또는
+                  이하(로우 셸프)의 모든 주파수를 일괄적으로 올리거나 내립니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>장점:</strong> 전체적인 밝기나 무게감을 조절하기
+                  쉽습니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                  <strong>활용:</strong> 고음을 전체적으로 밝게 하거나, 저음을
+                  전체적으로 줄일 때 사용합니다.
+                </p>
+              </div>
 
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    Voice Changer with Effects (Android)
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    다양한 음성 효과와 백그라운드 사운드를 제공합니다. 녹음한
-                    파일에 효과를 적용하거나 실시간으로 변조할 수 있습니다.
-                  </p>
-                </div>
-
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    VoiceFX
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    직관적인 인터페이스로 쉽게 음성을 변조하고, 소셜 미디어에
-                    바로 공유할 수 있습니다.
-                  </p>
-                </div>
+              <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                  하이패스/로우패스 필터
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>특징:</strong> 특정 주파수 이상(하이패스) 또는
+                  이하(로우패스)를 완전히 제거합니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>하이패스 필터:</strong> 저음을 제거합니다. 음성
+                  녹음에서 80Hz 이하의 불필요한 저음을 제거할 때 필수입니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>로우패스 필터:</strong> 고음을 제거합니다. 아날로그
+                  느낌을 내거나 배경 요소를 뒤로 물릴 때 사용합니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                  <strong>활용:</strong> 거의 모든 트랙에 하이패스 필터를
+                  기본으로 적용하는 것이 좋습니다.
+                </p>
               </div>
             </div>
           </section>
 
-          {/* 실전 활용 가이드 */}
+          {/* 이퀄라이저 사용의 기본 원칙 */}
           <section className='mb-10'>
             <h2 className='text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2'>
-              <Video className='w-6 h-6 text-red-600 dark:text-red-400' />
-              실전 활용 가이드
+              <Zap className='w-6 h-6 text-yellow-600 dark:text-yellow-400' />
+              이퀄라이저 사용의 기본 원칙
             </h2>
 
-            {/* 단계별 작업 프로세스 */}
-            <div className='mb-8'>
-              <h3 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
-                단계별 작업 프로세스
-              </h3>
-              <div className='space-y-4'>
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    1단계: 깨끗한 원본 녹음
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    음성 변조의 품질은 원본 녹음 품질에 크게 좌우됩니다.
-                    노이즈가 적고 명료한 음성을 녹음하세요. 마이크와 입 사이
-                    거리를 일정하게 유지하고, 조용한 환경에서 녹음하는 것이
-                    중요합니다.
-                  </p>
-                </div>
+            <div className='space-y-6'>
+              <div className='p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'>
+                <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
+                  1. 빼기가 더하기보다 낫다
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-2'>
+                  <strong>원칙:</strong> 특정 주파수를 올리기보다는 불필요한
+                  주파수를 제거하는 것이 더 자연스럽습니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-2'>
+                  <strong>이유:</strong> 주파수를 올리면 다른 부분과의 불균형이
+                  생기고, 전체 음량이 커져서 클리핑 위험이 있습니다. 반면 빼기는
+                  공간을 만들고 명료도를 높입니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed'>
+                  <strong>실전 예시:</strong> 목소리를 더 밝게 하고 싶다면
+                  고음을 올리는 대신, 저음과 중저음을 살짝 줄이세요. 결과적으로
+                  상대적으로 고음이 강조됩니다.
+                </p>
+              </div>
 
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    2단계: 노이즈 제거 및 정리
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    변조를 적용하기 전에 배경 소음, 입안 소리, 숨소리 등을
-                    제거합니다. 음성 변조는 노이즈도 함께 변조하기 때문에,
-                    깨끗한 원본이 필수입니다.
-                  </p>
-                </div>
+              <div className='p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'>
+                <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
+                  2. 넓게 올리고, 좁게 빼라
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-2'>
+                  <strong>원칙:</strong> 주파수를 올릴 때는 넓은 대역폭(낮은 Q
+                  값)으로, 줄일 때는 좁은 대역폭(높은 Q 값)으로 조절하세요.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-2'>
+                  <strong>이유:</strong> 넓게 올리면 자연스럽고, 좁게 빼면 문제
+                  주파수만 정확히 제거할 수 있습니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed'>
+                  <strong>Q 값 가이드:</strong>
+                </p>
+                <ul className='list-disc list-inside text-gray-700 dark:text-gray-300 text-sm mt-2 space-y-1'>
+                  <li>넓은 조절(음악적): Q = 0.5 - 1.0</li>
+                  <li>중간 조절: Q = 1.0 - 3.0</li>
+                  <li>좁은 조절(수술적): Q = 5.0 이상</li>
+                </ul>
+              </div>
 
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    3단계: 주요 변조 적용
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    피치, 포먼트, 속도 등 기본 변조를 적용합니다. 한 번에 모든
-                    효과를 넣지 말고, 하나씩 적용하면서 결과를 확인하세요.
-                  </p>
-                </div>
+              <div className='p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800'>
+                <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
+                  3. 귀로 듣고 판단하라
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-2'>
+                  <strong>원칙:</strong> 화면의 그래프가 아니라 실제로 들리는
+                  소리를 기준으로 판단하세요.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-2'>
+                  <strong>함정:</strong> 시각적으로 멋있어 보이는 EQ 커브가 항상
+                  좋게 들리는 것은 아닙니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed'>
+                  <strong>방법:</strong> 눈을 감고 들어보세요. 조절 전후를 A/B
+                  비교하며 실제로 나아졌는지 확인하세요.
+                </p>
+              </div>
 
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    4단계: 세부 효과 추가
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    EQ, 리버브, 딜레이, 디스토션 등 추가 효과를 적용합니다. 각
-                    효과의 파라미터를 세밀하게 조정하여 원하는 느낌을 만듭니다.
-                  </p>
-                </div>
+              <div className='p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800'>
+                <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
+                  4. 적은 것이 많은 것이다
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-2'>
+                  <strong>원칙:</strong> 한 번에 2-4dB 정도만 조절하세요.
+                  드라마틱한 변화는 대부분 과도합니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-2'>
+                  <strong>예외:</strong> 문제 주파수를 제거할 때는 -6dB에서
+                  -12dB까지 과감하게 줄일 수 있습니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed'>
+                  <strong>점검 방법:</strong> 조절을 과장되게 했다가(±10dB),
+                  천천히 줄여가며 적절한 지점을 찾으세요.
+                </p>
+              </div>
 
-                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    5단계: 믹싱과 마스터링
-                  </h4>
-                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    최종 음량을 조절하고, 필요하면 컴프레서나 리미터를
-                    사용합니다. 변조된 음성이 전체 오디오 믹스에서 잘 들리도록
-                    조정합니다.
-                  </p>
-                </div>
+              <div className='p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'>
+                <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
+                  5. 문맥 속에서 판단하라
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-2'>
+                  <strong>원칙:</strong> 솔로로 들었을 때와 전체 믹스에서 들었을
+                  때는 다릅니다. 항상 전체 맥락에서 판단하세요.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-2'>
+                  <strong>흔한 실수:</strong> 보컬을 솔로로 듣고 완벽하게
+                  만들었는데, 전체 믹스에 넣으니 묻히거나 튀는 경우입니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed'>
+                  <strong>올바른 방법:</strong> 솔로로 큰 문제만 수정하고, 세부
+                  조정은 전체 믹스를 들으며 진행하세요.
+                </p>
               </div>
             </div>
+          </section>
 
-            {/* 자연스러움 유지하기 */}
+          {/* 목적별 이퀄라이징 가이드 */}
+          <section className='mb-10'>
+            <h2 className='text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2'>
+              <Mic className='w-6 h-6 text-pink-600 dark:text-pink-400' />
+              목적별 이퀄라이징 가이드
+            </h2>
+
+            {/* 음성/팟캐스트 개선하기 */}
             <div className='mb-8'>
               <h3 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
-                자연스러움 유지하기
+                음성/팟캐스트 개선하기
               </h3>
-              <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-4'>
-                음성 변조의 함정은 과도하게 적용하여 알아듣기 어렵게 만드는
-                것입니다.
-              </p>
+              <div className='space-y-3'>
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    1단계 - 하이패스 필터
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    80Hz 이하를 제거하여 불필요한 저음을 없앱니다. 이것만으로도
+                    명료도가 크게 향상됩니다.
+                  </p>
+                </div>
 
-              <ul className='space-y-3'>
-                <li className='flex items-start gap-3'>
-                  <span className='text-purple-600 dark:text-purple-400 font-bold mt-1'>
-                    •
-                  </span>
-                  <div>
-                    <strong className='text-gray-900 dark:text-white'>
-                      명료도 우선:
-                    </strong>
-                    <span className='text-gray-700 dark:text-gray-300'>
-                      {' '}
-                      아무리 멋진 효과라도 무슨 말인지 알아들을 수 없다면
-                      소용없습니다. 항상 명료도를 우선시하고, 효과는 적절한
-                      수준에서 멈춰야 합니다.
-                    </span>
-                  </div>
-                </li>
-                <li className='flex items-start gap-3'>
-                  <span className='text-purple-600 dark:text-purple-400 font-bold mt-1'>
-                    •
-                  </span>
-                  <div>
-                    <strong className='text-gray-900 dark:text-white'>
-                      문맥에 맞게:
-                    </strong>
-                    <span className='text-gray-700 dark:text-gray-300'>
-                      {' '}
-                      콘텐츠의 분위기와 목적에 맞는 효과를 선택하세요. 진지한
-                      다큐멘터리에 헬륨 음성을 사용하거나, 코미디에 악마 음성을
-                      쓰는 것은(의도적인 경우가 아니라면) 적절하지 않습니다.
-                    </span>
-                  </div>
-                </li>
-                <li className='flex items-start gap-3'>
-                  <span className='text-purple-600 dark:text-purple-400 font-bold mt-1'>
-                    •
-                  </span>
-                  <div>
-                    <strong className='text-gray-900 dark:text-white'>
-                      미묘함의 힘:
-                    </strong>
-                    <span className='text-gray-700 dark:text-gray-300'>
-                      {' '}
-                      때로는 작은 변화가 큰 변화보다 효과적입니다. 피치를 1-2
-                      semitone만 바꿔도 분위기가 달라질 수 있습니다.
-                    </span>
-                  </div>
-                </li>
-                <li className='flex items-start gap-3'>
-                  <span className='text-purple-600 dark:text-purple-400 font-bold mt-1'>
-                    •
-                  </span>
-                  <div>
-                    <strong className='text-gray-900 dark:text-white'>
-                      A/B 테스트:
-                    </strong>
-                    <span className='text-gray-700 dark:text-gray-300'>
-                      {' '}
-                      원본과 변조된 버전을 번갈아 들으며 비교하세요. 여러 버전을
-                      만들어 가장 적합한 것을 선택하는 것이 좋습니다.
-                    </span>
-                  </div>
-                </li>
-              </ul>
-            </div>
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    2단계 - 머디함 제거
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    250-400Hz를 2-4dB 줄여서 답답한 느낌을 제거합니다. 특히 남성
+                    목소리는 이 영역이 과도한 경우가 많습니다.
+                  </p>
+                </div>
 
-            {/* 창의적인 활용 사례 */}
-            <div className='mb-8'>
-              <h3 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
-                창의적인 활용 사례
-              </h3>
-              <div className='space-y-4'>
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    3단계 - 명료도 향상
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    2-4kHz를 2-3dB 올려서 목소리를 앞으로 끌어냅니다. 자음이
+                    명확해지고 알아듣기 쉬워집니다.
+                  </p>
+                </div>
+
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    4단계 - 치찰음 조절
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    6-8kHz가 과도하면 2-3dB 줄입니다. 'ㅅ', 'ㅆ' 소리가 너무
+                    날카롭지 않게 합니다.
+                  </p>
+                </div>
+
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    5단계 - 공기감 추가
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    10kHz 이상을 1-2dB 올리면 녹음이 더 고급스럽고 열린 느낌이
+                    됩니다.
+                  </p>
+                </div>
+
                 <div className='p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    <strong>최종 체크:</strong> 전체적으로 자연스럽고, 오랜 시간
+                    들어도 피로하지 않은지 확인하세요.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 음악 믹싱 */}
+            <div className='mb-8'>
+              <h3 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
+                음악 믹싱
+              </h3>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
                   <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    스토리텔링 강화
+                    킥드럼
                   </h4>
                   <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    팟캐스트나 오디오 드라마에서 음성 변조를 사용하면 한 명의
-                    내레이터가 여러 캐릭터를 연기할 수 있습니다. 각 캐릭터마다
-                    고유한 음성 특성을 부여하면 청취자가 누가 말하는지 쉽게
-                    구별할 수 있습니다.
+                    60Hz에서 펀치감, 3-5kHz에서 어택감을 강조합니다. 200-500Hz는
+                    줄여서 머디함을 방지합니다.
                   </p>
                 </div>
 
-                <div className='p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'>
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
                   <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    교육 콘텐츠
+                    베이스
                   </h4>
                   <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    어린이 교육 영상에서 만화 캐릭터나 동물 목소리를 사용하면
-                    집중도와 흥미를 높일 수 있습니다. 역사 속 인물을 재현할 때도
-                    시대에 맞는 음성 효과(오래된 라디오 느낌 등)를 추가하면
-                    몰입감이 높아집니다.
+                    40-60Hz에서 무게감을 확보하되, 100-200Hz는 조심스럽게
+                    다룹니다. 킥드럼과 주파수가 겹치므로 조율이 필요합니다.
                   </p>
                 </div>
 
-                <div className='p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800'>
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
                   <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    음악 프로덕션
+                    어쿠스틱 기타
                   </h4>
                   <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    힙합, 일렉트로닉, 실험 음악에서 음성 변조는 중요한 창작
-                    도구입니다. Auto-Tune, Vocoder, Talkbox 등의 효과는 이미
-                    많은 히트곡에서 사용되고 있습니다.
+                    80-120Hz에서 바디감, 2-5kHz에서 픽 소리와 명료도를
+                    조절합니다. 200-400Hz의 박스 울림은 줄입니다.
                   </p>
                 </div>
 
-                <div className='p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800'>
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
                   <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                    밈과 바이럴 콘텐츠
+                    일렉 기타
                   </h4>
                   <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                    유머러스한 음성 변조는 소셜 미디어에서 빠르게 확산됩니다.
-                    TikTok, Instagram Reels, YouTube Shorts 등에서 재미있는 음성
-                    효과는 조회수를 크게 높일 수 있습니다.
+                    100Hz 이하를 제거하고, 2-4kHz에서 날카로움을 조절합니다.
+                    디스토션 기타는 중고음이 과도할 수 있으므로 주의합니다.
+                  </p>
+                </div>
+
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    보컬
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    위의 음성 가이드를 기본으로 하되, 음악 장르에 따라
+                    조절합니다. 팝은 밝게, 재즈는 따뜻하게, 록은 공격적으로
+                    만듭니다.
+                  </p>
+                </div>
+
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    드럼 오버헤드
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    200Hz 이하를 제거하고, 8-12kHz에서 심벌의 광택을 조절합니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 녹음 환경 문제 해결 */}
+            <div className='mb-8'>
+              <h3 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
+                녹음 환경 문제 해결
+              </h3>
+              <div className='space-y-3'>
+                <div className='p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    방 울림 제거
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    200-500Hz에서 울리는 주파수를 찾아 좁은 Q로 제거합니다.
+                    솔로로 들으며 해당 주파수를 과장되게 올렸다 내리며 찾으세요.
+                  </p>
+                </div>
+
+                <div className='p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    에어컨/컴퓨터 소음
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    저음 노이즈가 문제라면 80-120Hz를 좁은 Q로 줄입니다.
+                    하이패스 필터만으로도 많이 개선됩니다.
+                  </p>
+                </div>
+
+                <div className='p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    전화/줌 녹음 개선
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    200Hz 이하와 4kHz 이상을 제거하여 통신 장비의 한계를
+                    보완합니다. 2-3kHz를 강조하면 명료도가 올라갑니다.
+                  </p>
+                </div>
+
+                <div className='p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    과도한 반향
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    로우 미드(250-500Hz)를 줄이고, 하이패스 필터를
+                    높게(100-150Hz) 설정합니다.
                   </p>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* 주의사항과 법적 고려사항 */}
+          {/* 실전 작업 흐름 */}
+          <section className='mb-10'>
+            <h2 className='text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2'>
+              <Music className='w-6 h-6 text-teal-600 dark:text-teal-400' />
+              실전 작업 흐름
+            </h2>
+
+            <div className='space-y-6'>
+              <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
+                  1단계: 문제 주파수 찾기
+                </h3>
+                <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                  스위핑 기법:
+                </h4>
+                <ol className='list-decimal list-inside text-gray-700 dark:text-gray-300 text-sm space-y-2'>
+                  <li>파라메트릭 EQ의 한 밴드를 선택합니다</li>
+                  <li>게인을 +10dB 정도 크게 올립니다</li>
+                  <li>Q 값을 5-10으로 좁게 설정합니다</li>
+                  <li>
+                    주파수를 천천히 움직이며 거슬리는 소리가 강조되는 지점을
+                    찾습니다
+                  </li>
+                  <li>찾은 주파수를 -3dB에서 -6dB 줄입니다</li>
+                </ol>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mt-3'>
+                  <strong>주의사항:</strong> 모든 주파수가 문제는 아닙니다. 정말
+                  거슬리는 부분만 조절하세요.
+                </p>
+              </div>
+
+              <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
+                  2단계: 전체 톤 조정
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-3'>
+                  문제를 해결했다면 이제 원하는 톤을 만듭니다.
+                </p>
+                <div className='space-y-2'>
+                  <div className='p-3 rounded bg-blue-50 dark:bg-blue-900/20'>
+                    <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                      <strong>따뜻한 느낌:</strong> 200-400Hz를 2-3dB 올리고,
+                      고음을 약간 줄입니다.
+                    </p>
+                  </div>
+                  <div className='p-3 rounded bg-green-50 dark:bg-green-900/20'>
+                    <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                      <strong>밝고 현대적인 느낌:</strong> 저음을 줄이고,
+                      3-5kHz와 10kHz 이상을 2-3dB 올립니다.
+                    </p>
+                  </div>
+                  <div className='p-3 rounded bg-purple-50 dark:bg-purple-900/20'>
+                    <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                      <strong>빈티지 느낌:</strong> 60Hz 이하와 8kHz 이상을
+                      제거하여 오래된 라디오 같은 느낌을 만듭니다.
+                    </p>
+                  </div>
+                  <div className='p-3 rounded bg-orange-50 dark:bg-orange-900/20'>
+                    <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                      <strong>공격적인 느낌:</strong> 중고음(3-6kHz)을 강조하고,
+                      저음을 타이트하게 만듭니다.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                <h3 className='text-xl font-semibold mb-3 text-gray-900 dark:text-white'>
+                  3단계: 비교와 미세 조정
+                </h3>
+                <div className='space-y-2'>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    <strong>A/B 비교:</strong> 대부분의 EQ 플러그인에는
+                    bypass(우회) 버튼이 있습니다. 조절 전후를 번갈아 들으며
+                    실제로 개선되었는지 확인하세요.
+                  </p>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    <strong>음량 보정:</strong> EQ를 적용하면 전체 음량이 달라질
+                    수 있습니다. 공정한 비교를 위해 음량을 맞춰야 합니다.
+                  </p>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    <strong>휴식 후 재점검:</strong> 귀는 쉽게 피로해지고
+                    적응합니다. 10-15분 휴식 후 다시 들어보면 새로운 관점을 얻을
+                    수 있습니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 흔한 실수와 해결책 */}
           <section className='mb-10'>
             <h2 className='text-2xl font-bold mb-4 text-gray-900 dark:text-white'>
-              주의사항과 법적 고려사항
+              흔한 실수와 해결책
             </h2>
 
             <div className='space-y-4'>
               <div className='p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'>
                 <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  저작권
+                  과도한 조절
                 </h3>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>증상:</strong> 소리가 부자연스럽고 인공적입니다. 특정
+                  주파수가 과도하게 튀거나 없습니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>원인:</strong> 한 번에 너무 많이(±6dB 이상)
+                  조절했거나, 너무 많은 밴드를 동시에 사용했습니다.
+                </p>
                 <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  유명인의 목소리를 모방하거나 변조하여 사용할 때는 주의가
-                  필요합니다. 특히 상업적 목적이라면 초상권과 저작권 문제가
-                  발생할 수 있습니다.
+                  <strong>해결:</strong> 모든 조절을 절반으로 줄이고 다시
+                  들어보세요. 필요 최소한만 조절하는 것이 목표입니다.
                 </p>
               </div>
 
               <div className='p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'>
                 <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  딥페이크 윤리
+                  저음 과다
                 </h3>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>증상:</strong> 소리가 혼탁하고 무겁습니다. 작은
+                  스피커나 스마트폰에서 들으면 문제가 더 심해집니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>원인:</strong> 저음을 올리는 것에만 집중했거나,
+                  하이패스 필터를 사용하지 않았습니다.
+                </p>
                 <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  AI 기반 음성 합성 기술의 발전으로 누구의 목소리든 재현할 수
-                  있게 되었지만, 악의적 사용은 법적 문제를 일으킬 수 있습니다.
-                  항상 윤리적으로 사용해야 합니다.
+                  <strong>해결:</strong> 모든 트랙에 80-100Hz 하이패스 필터를
+                  기본으로 적용하세요. 저음은 올리지 말고 중음을 줄여서
+                  상대적으로 강조하세요.
                 </p>
               </div>
 
               <div className='p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'>
                 <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  프라이버시
+                  치찰음 과다
                 </h3>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>증상:</strong> 'ㅅ', 'ㅆ' 소리가 날카롭고 귀에
+                  거슬립니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>원인:</strong> 5-8kHz를 과도하게 올렸거나, 컴프레션 후
+                  고음이 강조되었습니다.
+                </p>
                 <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  실제 사람의 음성을 변조하여 사용할 때는 당사자의 동의를 받아야
-                  합니다. 특히 인터뷰나 증언의 경우 명확한 허가가 필요합니다.
+                  <strong>해결:</strong> 6-8kHz를 2-3dB 줄이거나,
+                  디에서(De-esser)를 사용하세요. 디에서는 치찰음만 선택적으로
+                  줄입니다.
                 </p>
               </div>
 
               <div className='p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'>
                 <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
-                  과용 주의
+                  위상 문제
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>증상:</strong> EQ를 적용했는데 소리가 오히려 더
+                  이상해지거나 얇아집니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
+                  <strong>원인:</strong> 일부 EQ는 위상을 변화시켜 다른 트랙과의
+                  위상 관계를 망칠 수 있습니다.
+                </p>
+                <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                  <strong>해결:</strong> Linear Phase EQ를 사용하거나, 최소한의
+                  조절만 하세요. 특히 저음역에서 위상 문제가 많이 발생합니다.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* 추천 이퀄라이저 플러그인 */}
+          <section className='mb-10'>
+            <h2 className='text-2xl font-bold mb-4 text-gray-900 dark:text-white'>
+              추천 이퀄라이저 플러그인
+            </h2>
+
+            <div className='mb-6'>
+              <h3 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
+                무료 플러그인
+              </h3>
+              <div className='space-y-4'>
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    TDR Nova
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    무료지만 전문가급 기능을 제공하는 다이나믹 EQ입니다.
+                    파라메트릭 EQ와 컴프레서의 장점을 결합했습니다.
+                  </p>
+                </div>
+
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    MEqualizer (MeldaProduction)
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    강력한 분석 도구와 함께 제공되는 무료 EQ입니다. 시각적
+                    피드백이 뛰어납니다.
+                  </p>
+                </div>
+
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    EQ 내장 (DAW 기본 제공)
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    Ableton의 EQ Eight, Logic의 Channel EQ, Pro Tools의 EQ III
+                    등 대부분의 DAW 기본 EQ도 훌륭합니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className='mb-6'>
+              <h3 className='text-xl font-semibold mb-4 text-gray-900 dark:text-white'>
+                유료 플러그인
+              </h3>
+              <div className='space-y-4'>
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    FabFilter Pro-Q 3
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    업계 표준으로 자리잡은 EQ입니다. 직관적인 인터페이스, 강력한
+                    분석 기능, Linear Phase 모드를 제공합니다.
+                  </p>
+                </div>
+
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    Waves SSL E-Channel
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    전설적인 SSL 콘솔의 EQ를 모델링했습니다. 음악적이고 따뜻한
+                    사운드를 제공합니다.
+                  </p>
+                </div>
+
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    iZotope Neutron
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    AI 기반 자동 EQ 제안 기능이 있어 초보자에게 좋습니다.
+                    학습용으로도 유용합니다.
+                  </p>
+                </div>
+
+                <div className='p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
+                  <h4 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                    Sonnox Oxford EQ
+                  </h4>
+                  <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                    방송과 마스터링 분야에서 신뢰받는 고급 EQ입니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 장르별 이퀄라이징 특징 */}
+          <section className='mb-10'>
+            <h2 className='text-2xl font-bold mb-4 text-gray-900 dark:text-white'>
+              장르별 이퀄라이징 특징
+            </h2>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+              <div className='p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'>
+                <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                  팝
                 </h3>
                 <p className='text-gray-700 dark:text-gray-300 text-sm'>
-                  너무 많은 효과를 동시에 사용하면 소리가 지저분해지고 청취
-                  피로도가 높아집니다. '적을수록 좋다(Less is more)' 원칙을
-                  기억하세요.
+                  밝고 현대적인 사운드. 저음은 타이트하게, 고음은 반짝이게.
+                  2-5kHz에서 명료도, 10kHz 이상에서 공기감을 강조합니다.
+                </p>
+              </div>
+
+              <div className='p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'>
+                <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                  힙합
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                  강력한 저음이 중요합니다. 40-60Hz에서 베이스와 킥의 무게감을
+                  확보하되, 머디하지 않게 200-400Hz는 정리합니다.
+                </p>
+              </div>
+
+              <div className='p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800'>
+                <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                  재즈
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                  따뜻하고 자연스러운 사운드. 과도한 조절을 피하고, 200-500Hz의
+                  따뜻함을 유지합니다. 고음은 부드럽게 처리합니다.
+                </p>
+              </div>
+
+              <div className='p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800'>
+                <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                  록
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                  중음이 강조된 공격적인 사운드. 기타와 보컬이 2-5kHz에서
+                  경쟁하므로, 각각 다른 주파수를 강조하여 공간을 만듭니다.
+                </p>
+              </div>
+
+              <div className='p-4 rounded-lg bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800'>
+                <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                  클래식
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                  최소한의 조절. 자연스러운 악기 음색을 유지하는 것이
+                  목표입니다. 문제 주파수만 조심스럽게 제거합니다.
+                </p>
+              </div>
+
+              <div className='p-4 rounded-lg bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800'>
+                <h3 className='font-semibold text-gray-900 dark:text-white mb-2'>
+                  EDM
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 text-sm'>
+                  극단적이고 과장된 주파수 조절이 가능합니다. 킥의 펀치(60Hz),
+                  스네어의 크랙(200Hz), 신스의 밝기(5-10kHz)를 과감하게
+                  강조합니다.
                 </p>
               </div>
             </div>
@@ -962,21 +1083,25 @@ export default function BlogDetail() {
               마치며
             </h2>
             <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-4'>
-              음성 변조는 오디오 콘텐츠에 무한한 가능성을 제공합니다. 로봇부터
-              외계인까지, 어린아이부터 노인까지, 상상할 수 있는 모든 목소리를
-              만들어낼 수 있습니다. 중요한 것은 기술보다 창의성입니다.
+              이퀄라이저는 오디오 편집에서 가장 중요한 도구 중 하나이지만,
+              마법의 버튼은 아닙니다. 좋지 않은 녹음을 완벽하게 만들 수는
+              없지만, 좋은 녹음을 훌륭하게 만들 수 있습니다.
             </p>
             <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-4'>
-              이 글에서 소개한 기본 원리와 기법들을 바탕으로, 여러분만의 독특한
-              음성 효과를 실험해보세요. 처음에는 프리셋을 사용하다가 점차
-              파라미터를 직접 조절하며 자신만의 시그니처 사운드를 개발할 수
+              이 글에서 소개한 원칙과 기법들을 바탕으로 꾸준히 연습하세요.
+              처음에는 각 주파수가 어떻게 들리는지 익히는 데 집중하고, 점차
+              미묘한 차이를 구별할 수 있게 됩니다. 귀가 트레이닝되면 어떤
+              주파수를 어떻게 조절해야 할지 자연스럽게 알게 됩니다.
+            </p>
+            <p className='text-gray-700 dark:text-gray-300 leading-relaxed mb-4'>
+              무엇보다 중요한 것은 '더 좋게' 만드는 것이지 '다르게' 만드는 것이
+              아니라는 점입니다. 항상 조절 전후를 비교하며, 실제로 개선되었는지
+              냉정하게 판단하세요. 때로는 아무것도 하지 않는 것이 최선일 수도
               있습니다.
             </p>
             <p className='text-gray-700 dark:text-gray-300 leading-relaxed'>
-              음성 변조는 단순히 기술적인 트릭이 아니라, 청취자에게 새로운
-              경험을 선사하는 예술입니다. 지금 바로 마이크를 켜고 첫 실험을
-              시작해보세요. 여러분의 목소리가 어떤 놀라운 변신을 할지
-              기대됩니다!
+              이제 여러분의 오디오 파일을 열고 이퀄라이저로 음질을 한 단계
+              업그레이드해보세요!
             </p>
           </section>
         </article>
