@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Search,
@@ -14,7 +14,9 @@ import {
   Award,
   Flame,
   Newspaper,
+  Loader2,
 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 // 탭 타입 정의
 type TabType = 'recent' | 'popular' | 'trending' | 'featured';
@@ -35,98 +37,75 @@ interface Post {
   isPinned?: boolean;
 }
 
-// 샘플 게시글 데이터
-const samplePosts: Post[] = [
-  {
-    id: 1,
-    title: '오디오 편집의 기본: 음량 조절 방법',
-    author: '오디오마스터',
-    content:
-      '오디오 편집에서 가장 기본이 되는 음량 조절에 대해 알아보겠습니다. 올바른 음량 조절은 전체적인 음질에 큰 영향을 미칩니다...',
-    date: '2024-01-15',
-    views: 1250,
-    likes: 89,
-    comments: 23,
-    category: '튜토리얼',
-    tags: ['음량', '기초', '편집'],
-    isPinned: true,
-  },
-  {
-    id: 3,
-    title: '고품질 녹음을 위한 마이크 설정 가이드',
-    author: '녹음전문가',
-    content:
-      '브라우저에서 고품질 녹음을 하기 위한 마이크 설정 방법을 단계별로 설명합니다. 환경 설정부터 최적화까지...',
-    date: '2024-01-14',
-    views: 980,
-    likes: 67,
-    comments: 15,
-    category: '가이드',
-    tags: ['녹음', '마이크', '설정'],
-  },
-  {
-    id: 4,
-    title: '음성 변조로 만드는 독특한 효과들',
-    author: '크리에이터',
-    content:
-      '다양한 음성 변조 효과를 활용하여 독특한 오디오 콘텐츠를 만드는 방법을 소개합니다. 로봇 음성부터...',
-    date: '2024-01-13',
-    views: 2100,
-    likes: 145,
-    comments: 42,
-    category: '팁',
-    tags: ['음성변조', '효과', '크리에이티브'],
-  },
-  {
-    id: 6,
-    title: '오디오 병합 시 주의해야 할 사항',
-    author: '편집고수',
-    content:
-      '여러 오디오 파일을 하나로 병합할 때 발생할 수 있는 문제점과 해결 방법을 정리했습니다...',
-    date: '2024-01-12',
-    views: 750,
-    likes: 52,
-    comments: 18,
-    category: '팁',
-    tags: ['병합', '오디오', '편집'],
-  },
-  {
-    id: 5,
-    title: '이퀄라이저로 음질 개선하기',
-    author: '사운드디자이너',
-    content:
-      '이퀄라이저를 활용하여 음질을 개선하고 원하는 사운드를 만드는 방법을 설명합니다...',
-    date: '2024-01-11',
-    views: 1650,
-    likes: 98,
-    comments: 31,
-    category: '튜토리얼',
-    tags: ['이퀄라이저', '음질', '최적화'],
-  },
-  {
-    id: 2,
-    title: '새로운 기능 업데이트 안내',
-    author: '개발팀',
-    content:
-      '최신 업데이트에서 추가된 새로운 기능들을 소개합니다. 더욱 편리해진 사용자 경험을 확인해보세요...',
-    date: '2024-01-10',
-    views: 3200,
-    likes: 201,
-    comments: 67,
-    category: '공지',
-    tags: ['업데이트', '새기능', '공지'],
-    isPinned: true,
-  },
-];
-
 export default function Blogs() {
   const [activeTab, setActiveTab] = useState<TabType>('recent');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('전체');
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Supabase에서 블로그 데이터 가져오기
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // blog_freerecord 테이블에서 데이터 조회
+        // 테이블 구조에 맞게 필드명을 조정해주세요
+        const { data, error: fetchError } = await supabase
+          .from('blog_freerecord')
+          .select('*')
+          .order('created_at', { ascending: false }); // 최신순으로 정렬
+
+        if (fetchError) {
+          throw fetchError;
+        }
+
+        // Supabase 데이터를 Post 인터페이스에 맞게 변환
+        // 실제 테이블 구조에 맞게 필드 매핑을 조정해주세요
+        const transformedPosts: Post[] = (data || []).map((item: any) => ({
+          id: item.id || item.blog_id,
+          title: item.title || '',
+          author: item.author || item.author_name || '작성자',
+          authorAvatar: item.author_avatar || item.author_avatar_url,
+          content: item.content || item.description || item.excerpt || '',
+          date:
+            item.created_at ||
+            item.date ||
+            item.published_at ||
+            new Date().toISOString(),
+          views: item.views || item.view_count || 0,
+          likes: item.likes || item.like_count || 0,
+          comments: item.comments || item.comment_count || 0,
+          category: item.category || item.category_name || '기타',
+          tags: Array.isArray(item.tags)
+            ? item.tags
+            : typeof item.tags === 'string'
+            ? item.tags.split(',').map((tag: string) => tag.trim())
+            : [],
+          isPinned: item.is_pinned || item.pinned || false,
+        }));
+
+        setPosts(transformedPosts);
+      } catch (err: any) {
+        console.error('블로그 데이터 로딩 오류:', err);
+        setError(
+          err.message || '블로그 데이터를 불러오는 중 오류가 발생했습니다.'
+        );
+        setPosts([]); // 에러 발생 시 빈 배열로 설정
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   // 탭별 게시글 필터링
   const getFilteredPosts = () => {
-    let filtered = [...samplePosts];
+    let filtered = [...posts];
 
     // 검색어 필터링
     if (searchQuery) {
@@ -190,7 +169,7 @@ export default function Blogs() {
   // 카테고리 목록 추출
   const categories = [
     '전체',
-    ...Array.from(new Set(samplePosts.map(post => post.category))),
+    ...Array.from(new Set(posts.map(post => post.category))),
   ];
 
   // 날짜 포맷팅 함수
@@ -312,7 +291,23 @@ export default function Blogs() {
 
           {/* 게시글 목록 */}
           <div className='space-y-4'>
-            {filteredPosts.length === 0 ? (
+            {isLoading ? (
+              <div className='text-center py-12'>
+                <Loader2 className='w-8 h-8 animate-spin text-purple-600 dark:text-purple-400 mx-auto mb-4' />
+                <p className='text-gray-500 dark:text-gray-400 text-lg'>
+                  게시글을 불러오는 중...
+                </p>
+              </div>
+            ) : error ? (
+              <div className='text-center py-12'>
+                <p className='text-red-500 dark:text-red-400 text-lg mb-2'>
+                  오류가 발생했습니다
+                </p>
+                <p className='text-gray-500 dark:text-gray-400 text-sm'>
+                  {error}
+                </p>
+              </div>
+            ) : filteredPosts.length === 0 ? (
               <div className='text-center py-12'>
                 <p className='text-gray-500 dark:text-gray-400 text-lg'>
                   검색 결과가 없습니다. 다른 검색어를 시도해보세요.
@@ -439,7 +434,7 @@ export default function Blogs() {
               </h2>
             </div>
             <div className='space-y-3'>
-              {[...samplePosts]
+              {[...posts]
                 .sort((a, b) => {
                   const scoreA = a.views + a.likes * 10 + a.comments * 5;
                   const scoreB = b.views + b.likes * 10 + b.comments * 5;
@@ -501,7 +496,7 @@ export default function Blogs() {
               </h2>
             </div>
             <div className='space-y-4'>
-              {[...samplePosts]
+              {[...posts]
                 .sort((a, b) => {
                   const trendA = a.views + a.likes * 5 + a.comments * 3;
                   const trendB = b.views + b.likes * 5 + b.comments * 3;
@@ -543,7 +538,7 @@ export default function Blogs() {
               </h2>
             </div>
             <div className='space-y-4'>
-              {[...samplePosts]
+              {[...posts]
                 .sort(
                   (a, b) =>
                     new Date(b.date).getTime() - new Date(a.date).getTime()
