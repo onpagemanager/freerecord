@@ -317,7 +317,7 @@ export default function Blogs() {
           </div>
 
           {/* 게시글 목록 */}
-          <div className='space-y-4'>
+          <div className='flex flex-col gap-y-4'>
             {isLoading ? (
               <div className='text-center py-12'>
                 <Loader2 className='w-8 h-8 animate-spin text-purple-600 dark:text-purple-400 mx-auto mb-4' />
