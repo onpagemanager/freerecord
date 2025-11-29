@@ -135,6 +135,76 @@ export default function BlogDetail() {
     });
   };
 
+  // 공유 버튼 클릭 핸들러
+  const handleShareClick = async () => {
+    try {
+      // 게시글 데이터가 없는 경우 방어 로직
+      if (!post) {
+        alert('게시글 정보를 불러오지 못했습니다.');
+        return;
+      }
+
+      // 현재 페이지 URL 안전하게 가져오기
+      const currentUrl =
+        typeof window !== 'undefined' ? window.location.href : '';
+
+      if (!currentUrl) {
+        // URL 을 가져올 수 없는 경우
+        alert('현재 페이지 주소를 가져올 수 없습니다.');
+        return;
+      }
+
+      // Web Share API 지원 브라우저 (모바일/일부 데스크탑)
+      if (typeof navigator !== 'undefined' && 'share' in navigator) {
+        // navigator.share 는 일부 브라우저에서만 지원되므로 any 로 캐스팅
+        const webNavigator = navigator as any;
+        await webNavigator.share({
+          title: post.title,
+          text: post.content
+            ? post.content.slice(0, 80) +
+              (post.content.length > 80 ? '...' : '')
+            : '블로그 글 공유',
+          url: currentUrl,
+        });
+        return;
+      }
+
+      // Web Share API 미지원 시: 클립보드에 URL 복사
+      if (typeof navigator !== 'undefined') {
+        // clipboard 를 지원하는 브라우저 타입 보강
+        const navigatorWithClipboard = navigator as Navigator & {
+          clipboard?: {
+            writeText?: (data: string) => Promise<void>;
+          };
+        };
+
+        if (
+          navigatorWithClipboard.clipboard &&
+          navigatorWithClipboard.clipboard.writeText
+        ) {
+          await navigatorWithClipboard.clipboard.writeText(currentUrl);
+          alert('현재 글 링크가 클립보드에 복사되었습니다.');
+          return;
+        }
+      }
+
+      // 매우 구형 브라우저용 fallback (document 사용 가능 여부 확인)
+      if (typeof document !== 'undefined') {
+        const temporaryInputElement = document.createElement('input');
+        temporaryInputElement.value = currentUrl;
+        document.body.appendChild(temporaryInputElement);
+        temporaryInputElement.select();
+        document.execCommand('copy');
+        document.body.removeChild(temporaryInputElement);
+        alert('현재 글 링크가 클립보드에 복사되었습니다.');
+        return;
+      }
+    } catch (error) {
+      console.error('공유 중 오류가 발생했습니다:', error);
+      alert('공유 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  };
+
   // 로딩 중 표시
   if (isLoading) {
     return (
@@ -236,8 +306,12 @@ export default function BlogDetail() {
               <span>{post.comments}</span>
             </div>
 
-            {/* 공유 버튼 */}
-            <button className='ml-auto flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors'>
+            {/* 공유 버튼 - 상단 메타 영역 */}
+            <button
+              type='button'
+              onClick={handleShareClick}
+              className='ml-auto flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors'
+            >
               <Share2 className='w-4 h-4' />
               <span>공유</span>
             </button>
@@ -523,7 +597,11 @@ export default function BlogDetail() {
               <Heart className='w-4 h-4' />
               <span>좋아요 {post.likes}</span>
             </button>
-            <button className='flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300'>
+            <button
+              type='button'
+              onClick={handleShareClick}
+              className='flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300'
+            >
               <Share2 className='w-4 h-4' />
               <span>공유</span>
             </button>

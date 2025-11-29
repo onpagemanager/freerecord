@@ -173,16 +173,43 @@ export default function Blogs() {
   ];
 
   // 날짜 포맷팅 함수
+  // - Supabase에서 넘어오는 created_at(UTC) 기준으로
+  //   한국 시간(KST)에서의 오늘/어제/며칠 전을 자연스럽게 보여주기 위한 함수
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    // 1) 안전하게 Date 객체로 변환
+    const targetDate = new Date(dateString);
 
+    // 잘못된 날짜 문자열인 경우 그대로 반환하여 에러 방지
+    if (Number.isNaN(targetDate.getTime())) {
+      return dateString;
+    }
+
+    const now = new Date();
+
+    // 2) 시/분/초는 버리고 "날짜만" 비교 (타임존, 시간 차이로 인한 오표기 방지)
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const startOfTarget = new Date(
+      targetDate.getFullYear(),
+      targetDate.getMonth(),
+      targetDate.getDate()
+    );
+
+    const diffTime = startOfToday.getTime() - startOfTarget.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    // 3) 일수 차이에 따라 한국어로 표현
+    if (diffDays === 0) return '오늘';
     if (diffDays === 1) return '어제';
-    if (diffDays < 7) return `${diffDays}일 전`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)}주 전`;
-    return date.toLocaleDateString('ko-KR', {
+    if (diffDays > 1 && diffDays < 7) return `${diffDays}일 전`;
+    if (diffDays >= 7 && diffDays < 30)
+      return `${Math.floor(diffDays / 7)}주 전`;
+
+    // 30일 이상 차이 나면 풀 날짜로 표시
+    return targetDate.toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -339,7 +366,7 @@ export default function Blogs() {
                           {/* 작성자 */}
                           <div className='flex items-center gap-2'>
                             <span className='font-medium text-gray-700 dark:text-gray-300'>
-                              {post.author}
+                              작성자 : admin
                             </span>
                           </div>
 
