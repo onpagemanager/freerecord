@@ -1,17 +1,18 @@
 import { MetadataRoute } from 'next';
+import { supabase } from '@/lib/supabase';
 
 /**
  * sitemap.xml 파일 생성
- * 검색 엔진에 사이트 구조를 알려주어 인덱싱을 돕습니다.
- * Next.js는 이 파일을 자동으로 /sitemap.xml 경로에서 제공합니다.
+ * - Next.js App Router 의 내장 sitemap 기능 사용
+ * - 정적 페이지 + Supabase 블로그 글 상세 페이지를 모두 포함
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 환경 변수에서 사이트 URL 가져오기, 없으면 기본값 사용
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freerecord.com';
   const currentDate = new Date();
 
-  // 모든 페이지 목록 - 우선순위와 업데이트 빈도 설정
-  const routes: MetadataRoute.Sitemap = [
+  // 1. 정적 페이지 경로들
+  const staticRoutes: MetadataRoute.Sitemap = [
     // 홈페이지 - 최우선
     {
       url: baseUrl,
@@ -75,7 +76,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.6,
     },
-    // 콘텐츠 페이지
+    // 블로그 리스트 페이지
     {
       url: `${baseUrl}/blogs`,
       lastModified: currentDate,
@@ -97,5 +98,42 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  return routes;
+  // 2. Supabase 에서 블로그 글 상세 페이지 경로들 가져오기
+  let blogRoutes: MetadataRoute.Sitemap = [];
+
+  try {
+    // blog_freerecord 테이블에서 id, created_at 만 조회 (가볍게)
+    const { data, error } = await supabase
+      .from('blog_freerecord')
+      .select('id, created_at')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('sitemap - 블로그 데이터 조회 오류:', error);
+    } else if (data && Array.isArray(data)) {
+      blogRoutes = data
+        .filter(item => item && (item as any).id != null)
+        .map(item => {
+          const typedItem = item as { id: number | string; created_at?: string };
+
+          // created_at 이 있으면 해당 날짜, 없으면 현재 날짜 사용
+          const lastModifiedDate = typedItem.created_at
+            ? new Date(typedItem.created_at)
+            : currentDate;
+
+          return {
+            url: `${baseUrl}/blogs/${typedItem.id}`,
+            lastModified: lastModifiedDate,
+            changeFrequency: 'weekly' as const,
+            priority: 0.6,
+          };
+        });
+    }
+  } catch (err) {
+    // 예기치 않은 오류 방어
+    console.error('sitemap - 블로그 경로 생성 중 예외 발생:', err);
+  }
+
+  // 3. 정적 경로 + 블로그 상세 경로 합쳐서 반환
+  return [...staticRoutes, ...blogRoutes];
 }
