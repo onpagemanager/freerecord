@@ -44,6 +44,10 @@ export default function Blogs() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태
+
+  // 페이지당 표시할 게시글 수
+  const itemsPerPage = 10;
 
   // Supabase에서 블로그 데이터 가져오기
   useEffect(() => {
@@ -102,6 +106,11 @@ export default function Blogs() {
 
     fetchPosts();
   }, []);
+
+  // 검색어, 카테고리, 탭 변경 시 첫 페이지로 리셋
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, activeTab]);
 
   // 탭별 게시글 필터링
   const getFilteredPosts = () => {
@@ -165,6 +174,62 @@ export default function Blogs() {
   };
 
   const filteredPosts = getFilteredPosts();
+
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(filteredPosts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      // 페이지 변경 시 스크롤을 상단으로 이동
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // 페이지 번호 배열 생성 (최대 5개 표시)
+  const getPageNumbers = () => {
+    const maxVisiblePages = 5;
+    const pages: (number | string)[] = [];
+
+    if (totalPages <= maxVisiblePages) {
+      // 전체 페이지가 5개 이하인 경우 모두 표시
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // 현재 페이지 주변의 페이지 번호만 표시
+      if (currentPage <= 3) {
+        // 앞부분: 1, 2, 3, 4, 5
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        // 뒷부분: 1, ..., n-2, n-1, n
+        pages.push(1);
+        pages.push('...');
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // 중간: 1, ..., 현재-1, 현재, 현재+1, ..., n
+        pages.push(1);
+        pages.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
 
   // 카테고리 목록 추출
   const categories = [
@@ -341,7 +406,7 @@ export default function Blogs() {
                 </p>
               </div>
             ) : (
-              filteredPosts.map(post => (
+              paginatedPosts.map(post => (
                 <Link key={post.id} href={`/blogs/${post.id}`}>
                   <article className='group p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300 hover:shadow-lg cursor-pointer'>
                     <div className='flex items-start justify-between gap-4'>
@@ -430,19 +495,62 @@ export default function Blogs() {
           </div>
 
           {/* 페이지네이션 */}
-          {filteredPosts.length > 0 && (
-            <div className='mt-8 flex justify-center'>
-              <div className='flex gap-2'>
-                <button className='px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'>
+          {filteredPosts.length > 0 && totalPages > 1 && (
+            <div className='mt-8 flex flex-col items-center gap-4'>
+              {/* 페이지 정보 */}
+              <p className='text-sm text-gray-500 dark:text-gray-400'>
+                총 {filteredPosts.length}개의 게시글 중 {startIndex + 1}-
+                {Math.min(endIndex, filteredPosts.length)}번째 게시글
+              </p>
+
+              {/* 페이지네이션 버튼 */}
+              <div className='flex gap-2 flex-wrap justify-center'>
+                {/* 이전 버튼 */}
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className='px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                >
                   이전
                 </button>
-                <button className='px-4 py-2 rounded-lg bg-purple-600 dark:bg-purple-500 text-white'>
-                  1
-                </button>
-                <button className='px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors'>
-                  2
-                </button>
-                <button className='px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors'>
+
+                {/* 페이지 번호 버튼들 */}
+                {getPageNumbers().map((page, index) => {
+                  if (page === '...') {
+                    return (
+                      <span
+                        key={`ellipsis-${index}`}
+                        className='px-4 py-2 text-gray-500 dark:text-gray-400'
+                      >
+                        ...
+                      </span>
+                    );
+                  }
+
+                  const pageNumber = page as number;
+                  const isActive = currentPage === pageNumber;
+
+                  return (
+                    <button
+                      key={pageNumber}
+                      onClick={() => handlePageChange(pageNumber)}
+                      className={`px-4 py-2 rounded-lg border transition-colors ${
+                        isActive
+                          ? 'bg-purple-600 dark:bg-purple-500 text-white border-purple-600 dark:border-purple-500'
+                          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
+
+                {/* 다음 버튼 */}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className='px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                >
                   다음
                 </button>
               </div>
